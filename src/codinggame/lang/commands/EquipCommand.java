@@ -28,20 +28,12 @@ public class EquipCommand extends Command{
     private EquipmentSlot slot;
     private Equipment type;
 
-    public EquipCommand(GameState game, Parser parser,
+    public EquipCommand(GameState game,
             CommandBlock parentCommandBlock, Robot executingRobot,
-            String[] tokens, CommandHandler executor) {
-        super(game, parser, parentCommandBlock, executingRobot, tokens, executor);
-        slot = EquipmentSlot.getFromName(tokens[1]);
-        if(slot == null) {
-            //TODO: throw error
-        }
-        String itemName = Utils.join(" ", 2, -1, tokens);
-        ItemType type = ItemTypes.getItemByName(itemName);
-        if(!(type instanceof Equipment)) {
-            //TODO: throw error
-        }
-        this.type = (Equipment) type;
+            CommandHandler executor, EquipmentSlot slot, Equipment type) {
+        super(game, parentCommandBlock, executingRobot, executor);
+        this.slot = slot;
+        this.type = type;
         setMaxTime(0f);
     }
 
@@ -53,6 +45,21 @@ public class EquipCommand extends Command{
     public void end() {
         super.end();
         executingRobot.getInventory().equipInInventory(slot, type);
+    }
+
+    public static Command parseCommand(GameState game, Parser parser,
+            CommandBlock parentCommandBlock, Robot executingRobot,
+            String[] tokens, CommandHandler executor) {
+        EquipmentSlot slot = EquipmentSlot.getFromName(tokens[1]);
+        if(slot == null) {
+            parser.throwParsingError("There is no slot such as " + slot);
+        }
+        String itemName = Utils.join(" ", 2, -1, tokens);
+        ItemType type = ItemTypes.getItemByName(itemName);
+        if(!(type instanceof Equipment)) {
+            parser.throwParsingError(type + " is not a equipment");
+        }
+        return new EquipCommand(game, parentCommandBlock, executingRobot, executor, slot, (Equipment) type);
     }
     
     

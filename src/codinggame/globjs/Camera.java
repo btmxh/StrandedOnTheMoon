@@ -5,9 +5,11 @@
  */
 package codinggame.globjs;
 
+import codinggame.CodingGame;
+import codinggame.states.InputProcessor;
 import com.lwjglwrapper.LWJGL;
 import com.lwjglwrapper.display.Viewport;
-import org.joml.Vector2d;
+import com.lwjglwrapper.utils.math.MathUtils;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWScrollCallback;
@@ -25,8 +27,8 @@ public class Camera {
         LWJGL.mouse.getScrollCallback().add(new GLFWScrollCallback() {
             @Override
             public void invoke(long window, double xoffset, double yoffset) {
-                float pastTileSize = tileSize;
-                tileSize += yoffset;
+                if(CodingGame.getInstance().getGameState().getInputProcessor() != InputProcessor.GAME)  return;
+                tileSize = MathUtils.clamp(1f, tileSize + (float) yoffset, 256f);
             }
         });
     }

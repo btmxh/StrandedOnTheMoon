@@ -24,6 +24,7 @@ import codinggame.objs.robots.MinerRobot;
 import codinggame.objs.robots.Robot;
 import codinggame.states.GameState;
 import java.util.List;
+import org.joml.Vector2i;
 
 /**
  *
@@ -35,13 +36,11 @@ public class MineCommand extends Command{
     
     private Direction direction;
     
-    public MineCommand(GameState game, Parser parser, CommandBlock parentCommandBlock, Robot executingRobot, String[] tokens, CommandHandler executor) {
-        super(game, parser, parentCommandBlock, executingRobot, tokens, executor);
-        direction = Direction.get(parser, tokens[1]);
-        if(executingRobot instanceof MinerRobot) {
-            float miningSpeed = ((MinerRobot) executingRobot).getDrill().getItemType().getMiningSpeed();
-            super.setMaxTime(2f / miningSpeed);
-        } else super.setMaxTime(0);
+    public MineCommand(GameState game, CommandBlock parentCommandBlock, Robot executingRobot, CommandHandler executor, Direction direction) {
+        super(game, parentCommandBlock, executingRobot, executor);
+        this.direction = direction;
+        float miningSpeed = ((MinerRobot) executingRobot).getDrill().getItemType().getMiningSpeed();
+        super.setMaxTime(2f / miningSpeed);
     }
 
     @Override
@@ -121,5 +120,14 @@ public class MineCommand extends Command{
             parser.throwParsingError(name + " is not a valid go direction");
             return null;
         }
+    }
+    public static Command parseCommand(GameState game, Parser parser,
+            CommandBlock parentCommandBlock, Robot executingRobot,
+            String[] tokens, CommandHandler executor) {
+        Direction direction = Direction.get(parser, tokens[1]);
+        if(!(executingRobot instanceof MinerRobot)) {
+            parser.throwParsingError("This robot is not a miner robot");
+        }
+        return new MineCommand(game, parentCommandBlock, executingRobot, executor, direction);
     }
 }

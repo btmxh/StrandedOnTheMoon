@@ -17,7 +17,7 @@ import java.util.List;
  * @author Welcome
  */
 public enum EquipmentSlot {
-    DRILL(IColor.RED, MinerRobot.class);
+    DRILL(IColor.ORANGE, MinerRobot.class);
     
     private List<Class<? extends Robot>> robotTypes;
     private IColor color;

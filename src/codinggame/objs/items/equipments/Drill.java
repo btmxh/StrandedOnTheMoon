@@ -33,8 +33,8 @@ public class Drill extends CountItem{
     
         private float miningSpeed;
 
-        public Type(Texture2D texture, String name, float miningSpeed) {
-            super(texture, name, 0d);
+        public Type(String path, String name, float miningSpeed) {
+            super(path, name, 0d);
             this.miningSpeed = miningSpeed;
         }
 

@@ -5,19 +5,41 @@
  */
 package codinggame.objs.items;
 
+import com.lwjglwrapper.LWJGL;
+import com.lwjglwrapper.nanovg.NVGImage;
 import com.lwjglwrapper.opengl.objects.Texture2D;
+import com.lwjglwrapper.opengl.objects.TextureData;
+import com.lwjglwrapper.utils.Utils;
+import java.io.IOException;
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.lwjgl.nanovg.NanoVG;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
 
 /**
  *
  * @author Welcome
  */
 public class ItemType implements Serializable{
+    private transient NVGImage nvgTexture;
     private transient final Texture2D texture;
     private final String name;
     
-    public ItemType(Texture2D texture, String name) {
-        this.texture = texture;
+    public ItemType(String path, String name) {
+        this.texture = new Texture2D(TextureData.fromResource(ItemType.class, path)){
+            @Override
+            public void configTexture(int id) {
+                GL13.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+                GL13.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+            }
+        };
+        try {
+            this.nvgTexture = LWJGL.graphics.createNanoVGImageFromResource(
+                    Utils.ioResourceToByteBuffer(ItemType.class.getResourceAsStream(path), 8 * 1024),
+                    NanoVG.NVG_IMAGE_GENERATE_MIPMAPS);
+        } catch (Exception ex) {}
         this.name = name;
     }
 
@@ -28,11 +50,19 @@ public class ItemType implements Serializable{
     public Texture2D getTexture() {
         return texture;
     }
+
+    public NVGImage getNanoVGTexture() {
+        return nvgTexture;
+    }
+    
+    public void dispose() {
+        nvgTexture.dispose();
+    }
     
     public static class Mass extends ItemType{
         
-        public Mass(Texture2D texture, String name) {
-            super(texture, name);
+        public Mass(String path, String name) {
+            super(path, name);
         }
         
     }
@@ -41,8 +71,8 @@ public class ItemType implements Serializable{
         
         private final double massPerItem;
 
-        public Count(Texture2D texture, String name, double massPerItem) {
-            super(texture, name);
+        public Count(String path, String name, double massPerItem) {
+            super(path, name);
             this.massPerItem = massPerItem;
         }
         

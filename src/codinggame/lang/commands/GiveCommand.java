@@ -31,33 +31,12 @@ public class GiveCommand extends Command {
     private Robot giveRobot;
     private Item give;
     
-    public GiveCommand(GameState game, Parser parser,
-            CommandBlock parentCommandBlock, Robot executingRobot, String[] tokens, CommandHandler executor) {
-        super(game, parser, parentCommandBlock, executingRobot, tokens, executor);
-        //give cosi 3 Copper Ore
-        String destinationID = tokens[1];
-        boolean amountInCommand = false;
-        try {
-            Double.parseDouble(tokens[2]);
-            amountInCommand = true;
-        } catch (NumberFormatException nfe) {}
-        String itemName = Utils.join(" ", (amountInCommand? 3:2), -1, tokens).trim();
-        giveRobot = game.getRobotHandler().getRobot(destinationID);
-        if(giveRobot == null) {
-            parser.throwParsingError(destinationID + " is not a robot name");
-        }
-        ItemType itemType = ItemTypes.getItemByName(itemName);
-        if(itemType == null) {
-            parser.throwParsingError("There is no item such as " + itemName);
-        }
+    public GiveCommand(GameState game,
+            CommandBlock parentCommandBlock, Robot executingRobot, String[] tokens, CommandHandler executor, Robot giveRobot, Item give) {
+        super(game, parentCommandBlock, executingRobot, executor);
+        this.give = give;
+        this.giveRobot = giveRobot;
         
-        if(itemType instanceof ItemType.Mass) {
-            double mass = amountInCommand? Double.parseDouble(tokens[2]):1;
-            give = new MassItem((ItemType.Mass) itemType, mass);
-        } else if(itemType instanceof ItemType.Count) {
-            int amount = amountInCommand? parser.parseInt(tokens[2]):1;
-            give = new CountItem((ItemType.Count) itemType, amount);
-        }
     }
 
     @Override
@@ -86,10 +65,37 @@ public class GiveCommand extends Command {
             giveRobot.getInventory().add(sourceItem.clone());
         }
     }
-    
-    
 
     @Override
     public void undoCommand() {
+    }
+
+    public static Command parseCommand(GameState game, Parser parser,
+            CommandBlock parentCommandBlock, Robot executingRobot,
+            String[] tokens, CommandHandler executor) {
+        String destinationID = tokens[1];
+        boolean amountInCommand = false;
+        try {
+            Double.parseDouble(tokens[2]);
+            amountInCommand = true;
+        } catch (NumberFormatException nfe) {}
+        String itemName = Utils.join(" ", (amountInCommand? 3:2), -1, tokens).trim();
+        Robot giveRobot = game.getRobotHandler().getRobot(destinationID);
+        if(giveRobot == null) {
+            parser.throwParsingError(destinationID + " is not a robot name");
+        }
+        ItemType itemType = ItemTypes.getItemByName(itemName);
+        if(itemType == null) {
+            parser.throwParsingError("There is no item such as " + itemName);
+        }
+        Item give = null;
+        if(itemType instanceof ItemType.Mass) {
+            double mass = amountInCommand? Double.parseDouble(tokens[2]):1;
+            give = new MassItem((ItemType.Mass) itemType, mass);
+        } else if(itemType instanceof ItemType.Count) {
+            int amount = amountInCommand? parser.parseInt(tokens[2]):1;
+            give = new CountItem((ItemType.Count) itemType, amount);
+        }
+        return new GiveCommand(game, parentCommandBlock, executingRobot, tokens, executor, giveRobot, give);
     }
 }

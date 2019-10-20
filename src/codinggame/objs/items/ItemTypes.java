@@ -27,18 +27,18 @@ public class ItemTypes {
         COPPER_ORE = create("copper_ore", "Copper Ore");
         COTEST1 = create("copper_ore", "Copper", 10);
         COTEST2 = create("copper_ore", "DONG", 10);
-        IRON_DRILL = new Drill.Type(loadTexture("iron_drill"), "Iron Drill", 1);
-        COPPER_DRILL = new Drill.Type(loadTexture("copper_drill"), "Copper Drill", 1.25f);
-        TITANIUM_DRILL = new Drill.Type(loadTexture("titanium_drill"), "Titanium Drill", 1.5f);
+        IRON_DRILL = new Drill.Type("/items/iron_drill.png", "Iron Drill", 1);
+        COPPER_DRILL = new Drill.Type("/items/copper_drill.png", "Copper Drill", 1.25f);
+        TITANIUM_DRILL = new Drill.Type("/items/titanium_drill.png", "Titanium Drill", 1.5f);
         MOON_ROCK = create("moon_rock", "Moon Rock");
     }
     
     private static ItemType.Mass create(String path, String name) {
-        return new ItemType.Mass(loadTexture(path), name);
+        return new ItemType.Mass("/items/" + path +".png", name);
     }
     
     private static ItemType.Count create(String path, String name, double massPerItem) {
-        return new ItemType.Count(loadTexture(path), name, massPerItem);
+        return new ItemType.Count("/items/" + path +".png", name, massPerItem);
     }
     
     public static ItemType getItemByName(String name) {
@@ -57,13 +57,14 @@ public class ItemTypes {
         return null;
     }
     
-    private static Texture2D loadTexture(String path) {
-        return new Texture2D(TextureData.fromResource(ItemTypes.class, "/items/" + path +".png")){
-            @Override
-            public void configTexture(int id) {
-                GL13.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-                GL13.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+    public static void dispose() {
+        for (Field field : ItemTypes.class.getFields()) {
+            try {
+                Object val = field.get(null);
+                if(val instanceof ItemType) ((ItemType) val).dispose();
+            } catch (Exception ex) {
+                continue;
             }
-        };
+        }
     }
 }

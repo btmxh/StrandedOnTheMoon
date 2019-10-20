@@ -28,7 +28,6 @@ public abstract class Command {
 
 
     protected GameState game;
-    protected Parser parser;
     protected CommandHandler executor;
     protected CommandBlock parentCommandBlock;
     protected Robot executingRobot;
@@ -36,17 +35,15 @@ public abstract class Command {
     protected float maxTime;
     protected int energyConsumption;
 
-    public Command(GameState game, Parser parser,
-            CommandBlock parentCommandBlock, Robot executingRobot,
-            String[] tokens, CommandHandler executor) {
-        this(game, parser, parentCommandBlock, executingRobot, tokens, 1, executor);
+    public Command(GameState game, CommandBlock parentCommandBlock,
+            Robot executingRobot, CommandHandler executor) {
+        this(game, parentCommandBlock, executingRobot, 1, executor);
     }
 
-    public Command(GameState game, Parser parser,
-            CommandBlock parentCommandBlock, Robot executingRobot,
-            String[] tokens, int energyConsumption, CommandHandler executor) {
+    public Command(GameState game, CommandBlock parentCommandBlock,
+            Robot executingRobot, int energyConsumption, 
+            CommandHandler executor) {
         this.game = game;
-        this.parser = parser;
         this.energyConsumption = energyConsumption;
         this.parentCommandBlock = parentCommandBlock;
         this.executingRobot = executingRobot;
@@ -80,6 +77,9 @@ public abstract class Command {
 
     public void end() {
         executingRobot.getBattery().increase(-energyConsumption);
+        synchronized (executingRobot.getLock()) {
+            executingRobot.getLock().notifyAll();
+        }
     }
 
     private static Map<String, Class<? extends Command>> commandClasses;
@@ -95,8 +95,8 @@ public abstract class Command {
             return null;
         } else {
             try {
-                return clazz.getConstructor(GameState.class, Parser.class, CommandBlock.class, Robot.class, String[].class, CommandHandler.class)
-                        .newInstance(game, parser, parentCommandBlock, executingRobot, commandTokens, executor);
+                return (Command) clazz.getMethod("parseCommand", GameState.class, Parser.class, CommandBlock.class, Robot.class, String[].class, CommandHandler.class)
+                        .invoke(null, game, parser, parentCommandBlock, executingRobot, commandTokens, executor);
             } catch (Exception ex) {
                 Logger.getLogger(Command.class.getName()).log(Level.SEVERE, null, ex);
                 return null;
@@ -128,5 +128,10 @@ public abstract class Command {
     }
 
     public abstract void undoCommand();
+    public static Command parseCommand(GameState game, Parser parser,
+            CommandBlock parentCommandBlock, Robot executingRobot,
+            String[] tokens, CommandHandler executor) {
+        return null;
+    }
 
 }

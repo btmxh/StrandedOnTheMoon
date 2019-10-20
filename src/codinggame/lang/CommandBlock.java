@@ -23,9 +23,9 @@ public class CommandBlock extends Command {
     private boolean stop = false;
     private boolean pendStop = false;
 
-    public CommandBlock(GameState game, Parser parser,
+    public CommandBlock(GameState game,
             CommandBlock parentCommandBlock, Robot executingRobot, CommandHandler executor) {
-        super(game, parser, parentCommandBlock, executingRobot, null, 0, executor);
+        super(game, parentCommandBlock, executingRobot, 0, executor);
         commands = new ArrayList<>();
     }
 
@@ -106,5 +106,11 @@ public class CommandBlock extends Command {
     @Override
     public void undoCommand() {
         commands.get(executing).undoCommand();
+    }
+
+    public static Command parseCommand(GameState game, Parser parser,
+            CommandBlock parentCommandBlock, Robot executingRobot,
+            String[] tokens, CommandHandler executor) {
+        return new CommandBlock(game, parentCommandBlock, executingRobot, executor);
     }
 }

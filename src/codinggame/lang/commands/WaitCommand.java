@@ -20,15 +20,21 @@ public class WaitCommand extends Command{
 
     private static final String FIRST_TOKEN = "wait";
     
-    public WaitCommand(GameState game, Parser parser,
+    public WaitCommand(GameState game,
             CommandBlock parentCommandBlock, Robot executingRobot,
-            String[] tokens, CommandHandler executor) {
-        super(game, parser, parentCommandBlock, executingRobot, tokens, executor);
-        super.setMaxTime((float) parser.parseDouble(tokens[1]));
+            CommandHandler executor, float time) {
+        super(game, parentCommandBlock, executingRobot, executor);
+        super.setMaxTime(time);
     }
 
     @Override
     public void undoCommand() {
     }
     
+    public static Command parseCommand(GameState game, Parser parser,
+            CommandBlock parentCommandBlock, Robot executingRobot,
+            String[] tokens, CommandHandler executor) {
+        return new WaitCommand(game, parentCommandBlock, executingRobot, executor, (float) parser.parseDouble(tokens[1]));
+    }
+
 }

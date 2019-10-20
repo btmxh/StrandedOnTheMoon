@@ -6,16 +6,15 @@
 package codinggame;
 
 import codinggame.globjs.RenderableTexture;
-import codinggame.map.proceduralmap.chunkloading.ChunkThread;
+import codinggame.objs.items.ItemTypes;
 import codinggame.ui.CodingArea;
 import codinggame.states.GameState;
+import codinggame.states.OptionState;
 import com.lwjglwrapper.LWJGL;
 import com.lwjglwrapper.display.Window;
-import com.lwjglwrapper.opengl.GLCalls;
-import com.lwjglwrapper.utils.IColor;
 import com.lwjglwrapper.utils.states.GameStateLoop;
 import java.util.Random;
-import org.lwjgl.opengl.GL11;
+import org.lwjgl.glfw.GLFW;
 
 /**
  *
@@ -26,6 +25,7 @@ public class CodingGame extends GameStateLoop {
     private Random random = new Random();
     private long frameID;
     private GameState gs;
+    private OptionState os;
     
     public CodingGame() {
     }
@@ -38,11 +38,13 @@ public class CodingGame extends GameStateLoop {
         LWJGL.currentLoop = this;
         
         gs = new GameState(this);
+        os = new OptionState(this);
         setState(gs);
     }
 
     @Override
     protected void dispose() {
+        ItemTypes.dispose();
     }
 
     @Override
@@ -71,9 +73,9 @@ public class CodingGame extends GameStateLoop {
     protected void createWindow() {
         Window.init();
         
-        window = new Window(69, 420, "Coding Game", 60);
-        window.fitScreen();
-        window.fullScreen(true);
+        window = new Window(1280, 720, "Coding Game", 60);
+//        window.fitScreen();
+//        window.fullScreen(true);
         window.create();
         
         window.setVisible(true);
@@ -89,6 +91,9 @@ public class CodingGame extends GameStateLoop {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+//        new Thread(() -> {
+//            while(true);
+//        }).start();
         new CodingGame().run();
     }
 
@@ -98,6 +103,11 @@ public class CodingGame extends GameStateLoop {
     
     public static CodingGame getInstance() {
         return (CodingGame) LWJGL.currentLoop;
+    }
+    
+    //For testing purposes
+    public static void debug(Object obj) {
+        getInstance().getGameState().getUIHandler().println(obj == null?"null":obj.toString());
     }
 
 }

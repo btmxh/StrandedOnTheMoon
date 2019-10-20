@@ -30,6 +30,8 @@ import com.lwjglwrapper.utils.Logger;
 import com.lwjglwrapper.utils.states.State;
 import org.joml.Rectanglef;
 import org.joml.Vector2f;
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWCharCallback;
 import org.lwjgl.glfw.GLFWWindowCloseCallback;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
@@ -45,8 +47,8 @@ public class GameState extends State<CodingGame>{
 //    private GameMap map;
 //    private MapRenderer renderer;
     //FBOs
-    private FBO gameFBO;
-    private Texture2D gameTexture;
+    FBO gameFBO;
+    Texture2D gameTexture;
     //Camera, Viewport
     public Viewport windowViewport, mapViewport;
     private Camera camera;
@@ -60,15 +62,13 @@ public class GameState extends State<CodingGame>{
     
     private Object choosen;
     
+    private InputProcessor inputProcessor;
+    
     public GameState(CodingGame game) {
         super(game);
-    }
-
-    @Override
-    public void show() {
-        Logger.enable = false;
         ItemTypes.initTypes();
         ModuleTextures.init();
+        inputProcessor = InputProcessor.GAME;
         LWJGL.window.getWindowCallbacks().getWindowCloseCallback().add(new GLFWWindowCloseCallback() {
             @Override
             public void invoke(long window) {
@@ -109,14 +109,30 @@ public class GameState extends State<CodingGame>{
     }
 
     @Override
+    public void show() {
+        
+    }
+
+    @Override
     public void update(float delta) {
-        gameUIHandler.tick();
-        robotHandler.update();
+        if(LWJGL.mouse.mousePressed(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+            inputProcessor = gameUIHandler.clickedOn()? InputProcessor.GAME_UI:InputProcessor.GAME;
+        }
+        
+        gameUIHandler.tick(inputProcessor);
+        robotHandler.update(inputProcessor);
         commandHandler.update(delta);
         
         mapHandler.update(camera);
-        camera.update(!gameUIHandler.clickedOn());
-        clock.update();
+        camera.update(inputProcessor == InputProcessor.GAME);
+        clock.update(delta);
+        
+        if(LWJGL.keyboard.keyReleased(GLFW.GLFW_KEY_ESCAPE)) {
+            switch (inputProcessor) {
+                case GAME:      game.setStateByIndex(1);
+                case GAME_UI:   gameUIHandler.closeInfoBar();
+            }
+        }
     }
 
     @Override
@@ -124,11 +140,16 @@ public class GameState extends State<CodingGame>{
         GLCalls.setClearColor(new IColor(0.1f));
         GLCalls.enable(GL11.GL_SCISSOR_TEST);
         GLCalls.clear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_STENCIL_BUFFER_BIT);
+        GLCalls.enable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         
         gameFBO.bind();
         GLCalls.setClearColor(new IColor(0.1f));
         GLCalls.enable(GL11.GL_SCISSOR_TEST);
         GLCalls.clear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_STENCIL_BUFFER_BIT);
+        
+        GLCalls.enable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         
         LWJGL.graphics.begin();
         LWJGL.graphics.rect(0, 0, LWJGL.window.getWidth(), LWJGL.window.getHeight());
@@ -136,7 +157,7 @@ public class GameState extends State<CodingGame>{
         LWJGL.graphics.end();
         
         mapViewport.set(LWJGL.window);
-        mapHandler.render(!robotHandler.hoveringOnRobots() && !gameUIHandler.clickedOn());
+        mapHandler.render(!robotHandler.hoveringOnRobots() && inputProcessor == InputProcessor.GAME);
         windowViewport.set(LWJGL.window);
         
         mapViewport.updateScissor(LWJGL.graphics);
@@ -192,7 +213,13 @@ public class GameState extends State<CodingGame>{
     public GameUIHandler getUIHandler() {
         return gameUIHandler;
     }
-    
-    
+
+    public void setProcessor(InputProcessor inputProcessor) {
+        this.inputProcessor = inputProcessor;
+    }
+
+    public InputProcessor getInputProcessor() {
+        return inputProcessor;
+    }
     
 }

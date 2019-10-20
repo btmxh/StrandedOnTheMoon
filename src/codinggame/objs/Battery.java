@@ -13,25 +13,25 @@ import java.io.Serializable;
  * @author Welcome
  */
 public class Battery implements Serializable{
-    private int energyUnit;
-    private int maxCapacity;
+    private double energyUnit;
+    private double maxCapacity;
 
-    public Battery(int energyUnit, int maxCapacity) {
+    public Battery(double energyUnit, double maxCapacity) {
         this.energyUnit = energyUnit;
         this.maxCapacity = maxCapacity;
     }
 
-    public int getEnergy() {
+    public double getEnergy() {
         return energyUnit;
     }
 
-    public int getMaxEnergyCapacity() {
+    public double getMaxEnergyCapacity() {
         return maxCapacity;
     }
 
-    public void increase(int amt) {
+    public void increase(double amt) {
         energyUnit += amt;
-        energyUnit = MathUtils.clamp(0, energyUnit, maxCapacity);
+        energyUnit = MathUtils.clamp(0.0, energyUnit, maxCapacity);
     }
     
     

@@ -14,8 +14,8 @@ import com.lwjglwrapper.opengl.objects.Texture2D;
  */
 public class Equipment extends ItemType.Count{
     
-    public Equipment(Texture2D texture, String name, double massPerItem) {
-        super(texture, name, massPerItem);
+    public Equipment(String path, String name, double massPerItem) {
+        super(path, name, massPerItem);
     }
     
 }

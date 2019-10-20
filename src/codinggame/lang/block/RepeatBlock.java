@@ -23,9 +23,9 @@ public class RepeatBlock extends CommandBlock {
     private int executed = 0;
     private int times;
 
-    public RepeatBlock(GameState game, Parser parser, CommandBlock parentCommandBlock, Robot executingRobot, String[] tokens,CommandHandler executor) {
-        super(game, parser, parentCommandBlock, executingRobot, executor);
-        times = parser.parseInt(tokens[1]);
+    public RepeatBlock(GameState game, CommandBlock parentCommandBlock, Robot executingRobot, CommandHandler executor, int times) {
+        super(game, parentCommandBlock, executingRobot, executor);
+        this.times = times;
     }
 
     @Override
@@ -52,7 +52,12 @@ public class RepeatBlock extends CommandBlock {
         return super.getEnergyConsumption() * times;
     }
     
-    
+    public static Command parseCommand(GameState game, Parser parser,
+            CommandBlock parentCommandBlock, Robot executingRobot,
+            String[] tokens, CommandHandler executor) {
+        int times = parser.parseInt(tokens[1]);
+        return new RepeatBlock(game, parentCommandBlock, executingRobot, executor, times);
+    }
     
     
 

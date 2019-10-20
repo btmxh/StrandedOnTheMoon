@@ -5,6 +5,7 @@
         <data xmlns="http://www.netbeans.org/ns/j2se-project/3">
             <name>CodingGame</name>
             <source-roots>
+                <root id="src.tempclasses.dir" name="Temporary Class Files"/>
                 <root id="src.saves.dir" name="Save Files"/>
                 <root id="src.res.dir" name="Resources"/>
                 <root id="src.dir"/>

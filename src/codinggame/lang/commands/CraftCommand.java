@@ -30,14 +30,11 @@ public class CraftCommand extends Command{
 
     private Recipe recipe;
 
-    public CraftCommand(GameState game, Parser parser,
+    public CraftCommand(GameState game,
             CommandBlock parentCommandBlock, Robot executingRobot,
-            String[] tokens, CommandHandler executor) {
-        super(game, parser, parentCommandBlock, executingRobot, tokens, executor);
-        String craftItem = Utils.join(" ", 1, -1, tokens);
-        ItemType type = ItemTypes.getItemByName(craftItem);
-        //TODO: throw error
-        recipe = Recipes.getRecipe(type);
+            CommandHandler executor, Recipe recipe) {
+        super(game, parentCommandBlock, executingRobot, executor);
+        this.recipe = recipe;
         //TODO: throw error
         setMaxTime(1.5f);
     }
@@ -57,6 +54,17 @@ public class CraftCommand extends Command{
     @Override
     public void undoCommand() {
         
+    }
+
+    public static Command parseCommand(GameState game, Parser parser,
+            CommandBlock parentCommandBlock, Robot executingRobot,
+            String[] tokens, CommandHandler executor) {
+        String craftItem = Utils.join(" ", 1, -1, tokens);
+        ItemType type = ItemTypes.getItemByName(craftItem);
+        if(type == null)    parser.throwParsingError("There is no item such as " + type);
+        Recipe recipe = Recipes.getRecipe(type);
+        if(recipe == null)  parser.throwParsingError("There is no recipe to craft " + type);
+        return new CraftCommand(game, parentCommandBlock, executingRobot, executor, recipe);
     }
     
 }

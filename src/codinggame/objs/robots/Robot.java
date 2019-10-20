@@ -13,6 +13,7 @@ import codinggame.objs.Battery;
 import codinggame.objs.RobotInventory;
 import codinggame.objs.modules.Module;
 import codinggame.states.GameState;
+import codinggame.states.InputProcessor;
 import codinggame.ui.CodingArea;
 import com.lwjglwrapper.LWJGL;
 import com.lwjglwrapper.display.Viewport;
@@ -20,6 +21,7 @@ import com.lwjglwrapper.nanovg.NVGGraphics;
 import com.lwjglwrapper.utils.IColor;
 import com.lwjglwrapper.utils.math.MathUtils;
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -45,6 +47,10 @@ public class Robot implements Serializable{
     protected RobotInventory inventory;
     protected List<Module> modules;
     protected Battery battery;
+    protected transient IColor color = IColor.LIME;
+    protected transient boolean hovering;
+    
+    private transient Object lock = new Object();
     
     public Robot(GameState game, Vector2f position, String name) {
         this.game = game;
@@ -55,7 +61,18 @@ public class Robot implements Serializable{
         battery = new Battery(50000, 100000);
     }
     
-    public void update() {
+    public void update(InputProcessor inputProcessor) {
+        Robot selectedRobot = game.getRobotHandler().getCurrentRobot();
+        color = selectedRobot == this? IColor.GOLDENROD:IColor.LIME;
+        hovering = isBeingHovered() && inputProcessor == InputProcessor.GAME;
+        if(hovering) {
+            if(LWJGL.mouse.mouseReleased(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+                color = color.darker();
+                game.getRobotHandler().selectRobot(this);
+            } else {
+                color = color.tint(0.5f);
+            }
+        }
         MapCell cell = game.getMapHandler().getMap().getMapLayer(GameMap.ORE_LAYER).getTileAt(getTileX(), getTileY());
         if(cell == null)    return;
         MapTile tile = cell.getTileType();
@@ -65,50 +82,33 @@ public class Robot implements Serializable{
         }
     }
     
-    public void render(NVGGraphics g, boolean selected) {
-        IColor color = selected? IColor.GOLDENROD:IColor.LIME;
-        
+    public void render(NVGGraphics g) {
         Camera camera = game.getCamera();
         Vector2f pixelPosition = getPixelPosition(camera);
         Vector2f translatedPosition = new Vector2f(pixelPosition).add(camera.getPixelTranslation());
         
-        if(isBeingHovered()) {
-            if(LWJGL.mouse.mouseReleased(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
-                color = color.darker();
-                game.getRobotHandler().selectRobot(this);
-            } else {
-                color = color.tint(0.5f);
-            }
-            
+        if(hovering) {
             int x = LWJGL.mouse.getCursorX();
             int y = LWJGL.mouse.getCursorY();
             int w = 250, h = 100;
             g.push();
-            g.translate(MathUtils.clamp(0, x, LWJGL.window.getWidth() / 2 - w), MathUtils.clamp(0, y, LWJGL.window.getHeight() - h));
+            g.translate(MathUtils.clamp(0, x, game.mapViewport.getWidth() - w), MathUtils.clamp(0, y, game.mapViewport.getHeight() - h));
             g.rect(0, 0, w, h);
             g.fill(IColor.LIGHTGRAY);
-            
-            CodingArea.textFont.use();
+            g.setUpText(CodingArea.textFont, IColor.WHITE, 20, NanoVG.NVG_ALIGN_LEFT | NanoVG.NVG_ALIGN_TOP);
             g.beginPath();
-            g.translate(10, 0);
-            g.textAlign(NanoVG.NVG_ALIGN_LEFT | NanoVG.NVG_ALIGN_TOP);
-            g.translate(0, 10);
-            g.textPaint(IColor.WHITE);
-            g.textSize(20);
+            g.translate(10, 10);
             g.text(getTypeName(), 0, 0);
             g.translate(0, 20);
             g.text("Name: " + name, 0, 0);
             g.translate(0, 20);
-            g.text("Battery: " + battery.getEnergy() + "/" + battery.getMaxEnergyCapacity(), 0, 0);
+            g.text("Battery: " + (int) battery.getEnergy() + "/" + (int) battery.getMaxEnergyCapacity(), 0, 0);
             g.pop();
         }
-        
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         g.push();
+        g.strokeWeight(2);
         g.circle(translatedPosition.x, translatedPosition.y, 8);
         g.fill(color);
-        g.strokeWeight(2);
         g.circle(translatedPosition.x, translatedPosition.y, 12);
         g.stroke(color);
         g.pop();
@@ -195,4 +195,14 @@ public class Robot implements Serializable{
         Vector2f translatedPosition = new Vector2f(pixelPosition).add(game.getCamera().getPixelTranslation());
         return LWJGL.mouse.getCursorPosition().distanceSquared(translatedPosition) < 16 * 16;
     }
+
+    public Object getLock() {
+        return lock;
+    }
+    
+    public void createLock() {
+        lock = new Object();
+    }
+    
+    
 }

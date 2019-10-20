@@ -18,7 +18,6 @@ public class Clock {
     private static final int MILLIS_PER_HOUR = MILLIS_PER_MINUTE * MINUTES_PER_HOUR;
     
     private long savedTime;
-    private long startTime;
     private long gameTime;
 
     public Clock() {
@@ -30,11 +29,11 @@ public class Clock {
     }
     
     public void start() {
-        this.startTime = System.currentTimeMillis();
+        gameTime = savedTime;
     }
     
-    public void update() {
-        gameTime = System.currentTimeMillis() - startTime + savedTime;
+    public void update(float delta) {
+        gameTime += delta * 1000;
     }
 
     public long getGameTime() {
@@ -79,9 +78,8 @@ public class Clock {
     }
     
     public static void main(String[] args) {
-        Clock clock = new Clock();
-        clock.setSavedTime(Long.MAX_VALUE);
-        clock.update();
-        System.out.println(clock.getDisplayTime());
+    }
+
+    public void stop() {
     }
 }

@@ -32,7 +32,7 @@ public class Parser {
         
         Robot executingRobot = game.getRobotHandler().getCurrentRobot();
                 
-        CommandBlock masterBlock = new CommandBlock(game, this, null, executingRobot, game.getCommandHandler());
+        CommandBlock masterBlock = new CommandBlock(game, null, executingRobot, game.getCommandHandler());
         CommandBlock currentBlock = masterBlock;
         for (processingLineIndex = 0; processingLineIndex < commands.length; processingLineIndex++) {
             String command = commands[processingLineIndex].trim();

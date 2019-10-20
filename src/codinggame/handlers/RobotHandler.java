@@ -8,6 +8,7 @@ package codinggame.handlers;
 import codinggame.globjs.Camera;
 import codinggame.objs.robots.Robot;
 import codinggame.states.GameState;
+import codinggame.states.InputProcessor;
 import com.lwjglwrapper.nanovg.NVGGraphics;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,15 +33,15 @@ public class RobotHandler {
         this.camera = camera;
     }
 
-    public void update() {
-        robots.values().forEach(Robot::update);
+    public void update(InputProcessor inputProcessor) {
+        robots.values().forEach(r -> r.update(inputProcessor));
     }
     
     public void render(NVGGraphics g) {
         g.begin();
         game.getMapViewport().updateScissor(g);
         for (Robot robot : robots.values()) {
-            robot.render(g, robot == selected);
+            robot.render(g);
         }
         g.end();
     }
@@ -101,6 +102,7 @@ public class RobotHandler {
                     Robot robot = (Robot) obj;
                     addRobot(robot);
                     robot.setGameState(game);
+                    robot.createLock();
                     robot.getInventory().refresh(game);
                 }
             } catch (IOException | ClassNotFoundException ex) {

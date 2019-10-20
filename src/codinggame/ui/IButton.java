@@ -22,8 +22,8 @@ public class IButton extends Button {
     
     private String text = "";
     
-    public IButton(Stage stage, Rectanglef rect, Paint[] fills, Paint stroke, Paint textPaint) {
-        super(stage, true);
+    public IButton(Stage stage, boolean autoAdd, Rectanglef rect, Paint[] fills, Paint stroke, Paint textPaint) {
+        super(stage, autoAdd);
         shapes.reset().setAll(new Rect(rect))
                       .setAllStrokes(stroke)
                       .setFill(fills[NORMAL], NORMAL)

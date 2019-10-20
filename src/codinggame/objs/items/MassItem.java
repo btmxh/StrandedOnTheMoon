@@ -5,6 +5,8 @@
  */
 package codinggame.objs.items;
 
+import java.util.Locale;
+
 /**
  *
  * @author Welcome
@@ -33,7 +35,7 @@ public class MassItem extends Item{
     
     @Override
     public String toString() {
-        return type.getName() + " (" + mass + " kg)";
+        return type.getName() + " (" + String.format(Locale.US, "%.1f", mass) + " kg)";
     }
 
     @Override

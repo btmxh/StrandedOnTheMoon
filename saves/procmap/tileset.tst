@@ -5,3 +5,4 @@
 3 tiles/barrier.png
 4 tiles/storage.png
 5 tiles/moon_rock.png
+6 tiles/central_storage_unit.png

@@ -12,6 +12,7 @@ import codinggame.lang.Parser;
 import codinggame.objs.robots.Robot;
 import codinggame.states.GameState;
 import org.joml.Vector2f;
+import org.joml.Vector2i;
 
 
 /**
@@ -22,29 +23,27 @@ public class GoCommand extends Command{
     
     private static final String FIRST_TOKEN = "go";
 
-    private Direction direction;
-    private int amount;
+    private Vector2i move;
     
     private Vector2f destination;
     
-    public GoCommand(GameState game, Parser parser, CommandBlock parentCommandBlock, Robot executingRobot, String[] tokens, CommandHandler executor) {
-        super(game, parser, parentCommandBlock, executingRobot, tokens, executor);
-        this.direction = Direction.get(parser, tokens[1]);
-        this.amount = tokens.length == 2? 1:parser.parseInt(tokens[2]);
-        setMaxTime(amount * 1f);
-        setEnergyConsumption(amount * 1);
+    public GoCommand(GameState game, CommandBlock parentCommandBlock, Robot executingRobot, CommandHandler executor, Vector2i move) {
+        super(game, parentCommandBlock, executingRobot, executor);
+        this.move = move;
+        setMaxTime((float) (move.length() * 1f));
+        setEnergyConsumption((int) (move.length() * 1));
     }
 
     @Override
     public void begin() {
         super.begin();
-        destination = new Vector2f(executingRobot.getPosition()).add(direction.direction.mul(amount, new Vector2f()));
+        destination = new Vector2f(executingRobot.getPosition()).add(move.x, move.y);
     }
 
     @Override
     public void update(float delta) {
         super.update(delta);
-        executingRobot.move(direction.direction.mul(amount * delta / maxTime, new Vector2f()));
+        executingRobot.move(new Vector2f(move).mul(delta / maxTime));
     }
 
     @Override
@@ -64,30 +63,12 @@ public class GoCommand extends Command{
         destination = new Vector2f();
     }
     
-    
-    
-    
-
-    private enum Direction {
-        UP(0, 1), DOWN(0, -1), LEFT(-1, 0), RIGHT(1, 0);
-        
-        private Vector2f direction;
-
-        private Direction(int x, int y) {
-            this.direction = new Vector2f(x, y);
-        }
-        
-        private static Direction get(Parser parser, String name) {
-            Direction[] directions = values();
-            for (Direction direction : directions) {
-                if(direction.name().equalsIgnoreCase(name)) {
-                    return direction;
-                }
-            }
-            parser.throwParsingError(name + " is not a valid go direction");
-            return null;
-        }
+    public static Command parseCommand(GameState game, Parser parser,
+            CommandBlock parentCommandBlock, Robot executingRobot,
+            String[] tokens, CommandHandler executor) {
+        int moveX = parser.parseInt(tokens[1]);
+        int moveY = parser.parseInt(tokens[2]);
+        Vector2i move = new Vector2i(moveX, moveY);
+        return new GoCommand(game, parentCommandBlock, executingRobot, executor, move);
     }
-    
-    
 }
