@@ -7,6 +7,7 @@ package codinggame.lang.interfaces;
 
 import codinggame.handlers.CommandHandler;
 import codinggame.lang.CommandBlock;
+import codinggame.lang.commands.WaitCommand;
 import codinggame.objs.robots.Robot;
 import codinggame.states.GameState;
 import java.util.logging.Level;
@@ -35,6 +36,11 @@ public class GameObject {
     
     public void print(Object obj) {
         game.getUIHandler().print(obj == null? "null":obj.toString());
+    }
+    
+    public void wait(float time) {
+        executor.execute(new WaitCommand(game, currentBlock, robot, executor, time));
+        lock();
     }
     
     void lock() {

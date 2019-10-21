@@ -20,7 +20,7 @@ public class MiningSpeedModule extends Module{
     private float scale = DEFAULT_SCALE;
     
     public MiningSpeedModule(GameState game) {
-        super(game, "Mining Speed Module", ModuleTextures.MINING_SPEED_MODULE, MinerRobot.class);
+        super(game, "Mining Speed Module", "/items/mine_speed_module.png", MinerRobot.class);
     }
 
     public float getScale() {

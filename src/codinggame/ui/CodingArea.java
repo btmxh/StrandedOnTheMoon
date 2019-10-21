@@ -424,7 +424,7 @@ public class CodingArea extends TextField {
 
         private void scroll(double yoffset) {
             if(scrollDisabled)   return;
-            if(CodingGame.getInstance().getGameState().getInputProcessor() != InputProcessor.GAME_UI)   return;
+            if(CodingGame.getInstance().gs.getInputProcessor() != InputProcessor.GAME_UI)   return;
             if(!new Rect(bounds).contains(LWJGL.mouse.getCursorPosition())) return;
             shiftRatio -= yoffset * 0.05f;
             shiftRatio = MathUtils.clamp(0f, shiftRatio, 1f);

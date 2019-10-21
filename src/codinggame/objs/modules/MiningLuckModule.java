@@ -7,6 +7,7 @@ package codinggame.objs.modules;
 
 import codinggame.objs.robots.MinerRobot;
 import codinggame.states.GameState;
+import java.io.IOException;
 
 /**
  *
@@ -19,7 +20,7 @@ public class MiningLuckModule extends Module{
     private float scale = DEFAULT_SCALE;
     
     public MiningLuckModule(GameState game) {
-        super(game, "Mining Luck Module", ModuleTextures.MINING_LUCK_MODULE, MinerRobot.class);
+        super(game, "Mining Luck Module", "/items/mine_luck_module.png", MinerRobot.class);
     }
 
     public float getScale() {

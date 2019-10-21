@@ -27,7 +27,7 @@ public class Camera {
         LWJGL.mouse.getScrollCallback().add(new GLFWScrollCallback() {
             @Override
             public void invoke(long window, double xoffset, double yoffset) {
-                if(CodingGame.getInstance().getGameState().getInputProcessor() != InputProcessor.GAME)  return;
+                if(CodingGame.getInstance().gs.getInputProcessor() != InputProcessor.GAME)  return;
                 tileSize = MathUtils.clamp(1f, tileSize + (float) yoffset, 256f);
             }
         });

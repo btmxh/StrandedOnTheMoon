@@ -51,9 +51,9 @@ public class MapHandler {
     }
     
     public void update(Camera camera) {
-        Vector2f glTranslation = camera.getGLTranslation(game.mapViewport);
+        Vector2f glTranslation = camera.getGLTranslation(game.getMapViewport());
         renderer.setOriginPosition(-1f + glTranslation.x, -1f - glTranslation.y);
-        renderer.setTileSize(game.mapViewport, game.getCamera().getTileSize(), game.getCamera().getTileSize());
+        renderer.setTileSize(game.getMapViewport(), game.getCamera().getTileSize(), game.getCamera().getTileSize());
         
         if(map instanceof ProcMap) {
             ((ProcMap) map).update();

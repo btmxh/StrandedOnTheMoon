@@ -20,6 +20,5 @@ public class ModuleTextures {
         SOLAR_PANEL_MODULE = new Texture2D(TextureData.fromResource(ModuleTextures.class, "/items/solar_module.png"));
         MINING_LUCK_MODULE = new Texture2D(TextureData.fromResource(ModuleTextures.class, "/items/mine_luck_module.png"));
         MINING_SPEED_MODULE = new Texture2D(TextureData.fromResource(ModuleTextures.class, "/items/mine_speed_module.png"));
-        
     }
 }

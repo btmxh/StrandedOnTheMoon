@@ -73,7 +73,7 @@ public class GameUIHandler {
     private JavaParser javaParser;
     private GameState game;
     
-    private LoggerWriter loggerWriter;
+    private PrintWriter loggerWriter;
 
     public GameUIHandler(Window window, GameState game) {
         initStaticVariables();
@@ -129,6 +129,7 @@ public class GameUIHandler {
                     g.fill(slot.getColor());
                     g.setUpText(CodingArea.textFont, IColor.WHITE, 16, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
                     g.text(item.toString(), 10, 15);
+                    g.image(item.getItemType().getNanoVGTexture(), INFO_BAR_WIDTH - 30, 0, 30, 30);
                     g.translate(0, 32);
                 }
                 for (Map.Entry<ItemType, Item> entry : robot.getInventory().getItems().entrySet()) {
@@ -138,6 +139,7 @@ public class GameUIHandler {
                     g.fill(new IColor(0.2f));
                     g.setUpText(CodingArea.textFont, IColor.WHITE, 16, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
                     g.text(item.toString(), 10, 15);
+                    g.image(item.getItemType().getNanoVGTexture(), INFO_BAR_WIDTH - 30, 0, 30, 30);
                     g.translate(0, 32);
                 }
             }
@@ -152,6 +154,8 @@ public class GameUIHandler {
                     g.fill(new IColor(0.2f));
                     g.setUpText(CodingArea.textFont, IColor.WHITE, 16, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
                     g.text(module.getName(), 10, 15);
+                    g.image(module.getNanoVGTexture(), INFO_BAR_WIDTH - 30, 0, 30, 30);
+                    g.translate(0, 32);
                 }
             }
         };
@@ -191,14 +195,11 @@ public class GameUIHandler {
             }
         };
         
-        codingArea = new CodingArea(stage, Rect.jomlRect(LWJGL.window.getWidth()-INFO_BAR_WIDTH * 3f - 2, LWJGL.window.getHeight() - 810, INFO_BAR_WIDTH * 2f, 600));
+        codingArea = new CodingArea(stage, Rect.jomlRect(LWJGL.window.getWidth() / 5 * 3 - INFO_BAR_WIDTH, LWJGL.window.getHeight() / 9 - 10, LWJGL.window.getWidth() / 5 * 2, LWJGL.window.getHeight() * 2 / 3));
         codingArea.setVisible(false);
-        codingArea.appendText("package codinggame;\nimport codinggame.states.GameState;\nimport codinggame.lang.interfaces.GameRobot;"
-                + "\nimport codinggame.objs.robots.Robot;\npublic class miner extends GameRobot{\n"
-                + "public miner(GameState game, Robot robot){\n"
-                + "super(game, robot);\n}\npublic void main(){println(123);}\n}");
+        codingArea.appendText("public void main(){println(123);}");
         codingArea.setLineNumbered(true);
-        loggerArea = new CodingArea(stage, Rect.jomlRect(LWJGL.window.getWidth() - INFO_BAR_WIDTH * 3f - 2, LWJGL.window.getHeight() - 200, INFO_BAR_WIDTH * 2f, 200));
+        loggerArea = new CodingArea(stage, Rect.jomlRect(LWJGL.window.getWidth() / 5 * 3 - INFO_BAR_WIDTH, LWJGL.window.getHeight() * 7 / 9, LWJGL.window.getWidth() / 5 * 2, LWJGL.window.getHeight() * 2 / 9));
         loggerArea.setEditable(false);
         loggerArea.setVisible(false);
         println("Output:");
@@ -223,9 +224,9 @@ public class GameUIHandler {
                 playButton.setText("Execute");
             } else {
                 String code = codingArea.getText();
-                Runnable main = javaParser.parse(code);
-                new Thread(main).start();
-//                game.getCommandHandler().execute(block);
+                Runnable main = javaParser.parse(code, game.getRobotHandler().getCurrentRobot());
+                Thread thread = new Thread(main);
+                game.getCommandHandler().addThread(game.getRobotHandler().getCurrentRobot(), thread);
                 playButton.setText("Stop");
             }
         });
@@ -310,9 +311,9 @@ public class GameUIHandler {
         loggerArea.getTextOnChangeListener().textOnChange(string, TextField.TextOnChangeListener.ADD);
     }
     
-    public Writer loggerWriter() {
+    public PrintWriter loggerWriter() {
         if(loggerWriter == null) {
-            loggerWriter = new LoggerWriter(loggerArea);
+            loggerWriter = new PrintWriter(new LoggerWriter());
         }
         return loggerWriter;
     }
@@ -324,19 +325,14 @@ public class GameUIHandler {
     
     private class LoggerWriter extends Writer{
 
-        private final CodingArea loggerArea;
-
-        private LoggerWriter(CodingArea loggerArea) {
-            this.loggerArea = loggerArea;
-            lock = loggerArea;
+        private LoggerWriter() {
+            lock = new Object();
         }
 
         @Override
         public void write(int c) throws IOException {
-            loggerArea.appendText((char) c + "");
+            print((char) c + "");
         }
-
-        
         
         @Override
         public void write(char[] cbuf, int off, int len) throws IOException {
@@ -347,17 +343,17 @@ public class GameUIHandler {
                 return;
             }
             String append = new String(cbuf, off, len);
-            loggerArea.appendText(append);
+            print(append);
         }
 
         @Override
         public void write(String append) throws IOException {
-            loggerArea.appendText(append);
+            print(append);
         }
 
         @Override
         public void write(String str, int off, int len) throws IOException {
-            loggerArea.appendText(str.substring(off, off + len));
+            print(str.substring(off, off + len));
         }
 
         @Override
@@ -383,8 +379,11 @@ public class GameUIHandler {
         public String toString() {
             return loggerArea.getText();
         }
-        
-        
+
+        @Override
+        public void write(char[] cbuf) throws IOException {
+            super.write(cbuf);
+        }
 
         @Override
         public void flush() throws IOException {

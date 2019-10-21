@@ -50,7 +50,7 @@ public class GameState extends State<CodingGame>{
     FBO gameFBO;
     Texture2D gameTexture;
     //Camera, Viewport
-    public Viewport windowViewport, mapViewport;
+    public Viewport windowViewport;
     private Camera camera;
     //Handlers
     private MapHandler mapHandler;
@@ -83,7 +83,6 @@ public class GameState extends State<CodingGame>{
         clock = new Clock();
         
         windowViewport = LWJGL.window.getViewport();
-        mapViewport = new Viewport(0, 0, LWJGL.window.getWidth(), LWJGL.window.getHeight(), true);
         mapHandler = new MapHandler(this, clock);
         
         camera = new Camera();
@@ -156,11 +155,9 @@ public class GameState extends State<CodingGame>{
         LWJGL.graphics.fill(IColor.BLACK);
         LWJGL.graphics.end();
         
-        mapViewport.set(LWJGL.window);
         mapHandler.render(!robotHandler.hoveringOnRobots() && inputProcessor == InputProcessor.GAME);
         windowViewport.set(LWJGL.window);
         
-        mapViewport.updateScissor(LWJGL.graphics);
         robotHandler.render(LWJGL.graphics);
         windowViewport.updateScissor(LWJGL.graphics);
         LWJGL.graphics.strokeWeight(2);
@@ -187,7 +184,7 @@ public class GameState extends State<CodingGame>{
     }
 
     public Viewport getMapViewport() {
-        return mapViewport;
+        return windowViewport;
     }
 
     public CommandHandler getCommandHandler() {

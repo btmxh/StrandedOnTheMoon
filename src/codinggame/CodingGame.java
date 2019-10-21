@@ -13,8 +13,9 @@ import codinggame.states.OptionState;
 import com.lwjglwrapper.LWJGL;
 import com.lwjglwrapper.display.Window;
 import com.lwjglwrapper.utils.states.GameStateLoop;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
-import org.lwjgl.glfw.GLFW;
 
 /**
  *
@@ -24,8 +25,10 @@ public class CodingGame extends GameStateLoop {
     
     private Random random = new Random();
     private long frameID;
-    private GameState gs;
-    private OptionState os;
+    public GameState gs;
+    public OptionState os;
+    
+    private final List<Runnable> queries = new ArrayList<>();
     
     public CodingGame() {
     }
@@ -60,6 +63,11 @@ public class CodingGame extends GameStateLoop {
     @Override
     protected void update(float delta) throws Exception {
         super.update(delta);
+        synchronized (queries) {
+            if(!queries.isEmpty()) {
+                queries.get(0).run();
+            }
+        }
     }
     
     
@@ -91,9 +99,9 @@ public class CodingGame extends GameStateLoop {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-//        new Thread(() -> {
-//            while(true);
-//        }).start();
+            //        new Thread(() -> {
+            //            while(true);
+            //        }).start();
         new CodingGame().run();
     }
 
@@ -107,7 +115,11 @@ public class CodingGame extends GameStateLoop {
     
     //For testing purposes
     public static void debug(Object obj) {
-        getInstance().getGameState().getUIHandler().println(obj == null?"null":obj.toString());
+        getInstance().gs.getUIHandler().println(obj == null?"null":obj.toString());
+    }
+    
+    public void execInMainThread(Runnable runnable) {
+        queries.add(runnable);
     }
 
 }

@@ -52,14 +52,14 @@ public class InventoryCell extends DataCell{
     public void parseObject(Object container) {
         inv = (Inventory) container;
         CodingGame codingGame = (CodingGame) LWJGL.currentLoop;
-        inv.refresh(codingGame.getGameState());
+        inv.refresh(codingGame.gs);
     }
 
     @Override
     public void updateSavedData(MapTilesets tilesets) {
         super.updateSavedData(tilesets);
         CodingGame codingGame = (CodingGame) LWJGL.currentLoop;
-        inv.refresh(codingGame.getGameState());
+        inv.refresh(codingGame.gs);
     }
     
     

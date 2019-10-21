@@ -59,11 +59,11 @@ public class GameMap {
     
     public void chooseTile(MapLayer layer, int x, int y) {
         chooseTile = new ChooseTile(x, y, layer);
-        CodingGame.getInstance().getGameState().select(chooseTile);
+        CodingGame.getInstance().gs.select(chooseTile);
     }
     
     public boolean tileChoosen(MapLayer layer, int x, int y) {
-        if(CodingGame.getInstance().getGameState().getSelectedObject() instanceof ChooseTile) 
+        if(CodingGame.getInstance().gs.getSelectedObject() instanceof ChooseTile) 
             return chooseTile == null? false:chooseTile.x == x && chooseTile.y == y && chooseTile.layer == layer;
         else return false;
     }

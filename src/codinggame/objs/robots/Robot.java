@@ -92,7 +92,7 @@ public class Robot implements Serializable{
             int y = LWJGL.mouse.getCursorY();
             int w = 250, h = 100;
             g.push();
-            g.translate(MathUtils.clamp(0, x, game.mapViewport.getWidth() - w), MathUtils.clamp(0, y, game.mapViewport.getHeight() - h));
+            g.translate(MathUtils.clamp(0, x, game.getMapViewport().getWidth() - w), MathUtils.clamp(0, y, game.getMapViewport().getHeight() - h));
             g.rect(0, 0, w, h);
             g.fill(IColor.LIGHTGRAY);
             g.setUpText(CodingArea.textFont, IColor.WHITE, 20, NanoVG.NVG_ALIGN_LEFT | NanoVG.NVG_ALIGN_TOP);

@@ -86,7 +86,7 @@ public class Parser {
     }
     
     public void throwParsingError(String description) {
-        GameUIHandler uiHandler = CodingGame.getInstance().getGameState().getUIHandler();
+        GameUIHandler uiHandler = CodingGame.getInstance().gs.getUIHandler();
         uiHandler.println("Error parsing line number " + (processingLineIndex + 1) + ": " + description);
         processingFailed = true;
     }

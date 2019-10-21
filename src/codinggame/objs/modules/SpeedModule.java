@@ -19,7 +19,7 @@ public class SpeedModule extends Module{
     private float scale = DEFAULT_SCALE;
     
     public SpeedModule(GameState game) {
-        super(game, "Speed Module", ModuleTextures.SPEED_MODULE, Robot.class);
+        super(game, "Speed Module", "/items/speed_module.png", Robot.class);
     }
 
     public float getScale() {

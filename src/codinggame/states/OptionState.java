@@ -36,7 +36,7 @@ public class OptionState extends State<CodingGame>{
 
     @Override
     public void render() {
-        new RenderableTexture(new Rectanglef(0, 0, LWJGL.window.getWidth(), LWJGL.window.getHeight()), game.getGameState().gameTexture).render(true);
+        new RenderableTexture(new Rectanglef(0, 0, LWJGL.window.getWidth(), LWJGL.window.getHeight()), game.gs.gameTexture).render(true);
         LWJGL.graphics.begin();
         LWJGL.graphics.rect(100, 200, 300, 400);
         LWJGL.graphics.fill(IColor.RED);

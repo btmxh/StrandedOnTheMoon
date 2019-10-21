@@ -8,10 +8,13 @@ package codinggame.handlers;
 import codinggame.CodingGame;
 import codinggame.lang.Command;
 import codinggame.lang.CommandBlock;
+import codinggame.objs.robots.Robot;
 import codinggame.states.GameState;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -23,11 +26,14 @@ public class CommandHandler {
     private List<CommandBlock> blocks;
     private List<Command> commands;
     private boolean stop;
+    
+    private Map<Robot, Thread> threads;
 
     public CommandHandler(GameState game) {
         this.game = game;
         blocks = new ArrayList<>();
         commands = new ArrayList<>();
+        threads = new HashMap<>();
     }
     
     public void update(float delta) {
@@ -47,6 +53,12 @@ public class CommandHandler {
             }
             command.update(delta);
         }
+        for (Iterator<Map.Entry<Robot, Thread>> it = threads.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Robot, Thread> entry = it.next();
+            if(entry.getValue().getState() == Thread.State.TERMINATED) {
+                it.remove();
+            }
+        }
     }
     
     public void execute(CommandBlock block) {
@@ -61,6 +73,11 @@ public class CommandHandler {
         command.begin();
     }
     
+    public void addThread(Robot robot, Thread thread) {
+        threads.put(robot, thread);
+        thread.start();
+    }
+    
     public void stop() {
         blocks.forEach(CommandBlock::stop);
     }
@@ -70,7 +87,7 @@ public class CommandHandler {
     }
     
     public void throwExecutionError(Command command, String description) {
-        GameUIHandler uiHandler = CodingGame.getInstance().getGameState().getUIHandler();
+        GameUIHandler uiHandler = CodingGame.getInstance().gs.getUIHandler();
         uiHandler.println("Execution error: " + description);
         Command.getRootCommandBlock(command).stop();
     }

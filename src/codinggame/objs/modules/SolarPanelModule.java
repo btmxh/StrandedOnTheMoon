@@ -19,7 +19,7 @@ public class SolarPanelModule extends Module{
     private int amount;
 
     public SolarPanelModule(GameState game, double chance, int amount) {
-        super(game, "Solar Panel Module", ModuleTextures.SOLAR_PANEL_MODULE, Robot.class);
+        super(game, "Solar Panel Module", "/items/solar_module.png", Robot.class);
         this.chance = chance;
         this.amount = amount;
     }

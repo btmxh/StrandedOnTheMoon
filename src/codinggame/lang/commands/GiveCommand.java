@@ -31,8 +31,8 @@ public class GiveCommand extends Command {
     private Robot giveRobot;
     private Item give;
     
-    public GiveCommand(GameState game,
-            CommandBlock parentCommandBlock, Robot executingRobot, String[] tokens, CommandHandler executor, Robot giveRobot, Item give) {
+    public GiveCommand(GameState game, CommandBlock parentCommandBlock, Robot executingRobot,
+            CommandHandler executor, Robot giveRobot, Item give) {
         super(game, parentCommandBlock, executingRobot, executor);
         this.give = give;
         this.giveRobot = giveRobot;
@@ -96,6 +96,6 @@ public class GiveCommand extends Command {
             int amount = amountInCommand? parser.parseInt(tokens[2]):1;
             give = new CountItem((ItemType.Count) itemType, amount);
         }
-        return new GiveCommand(game, parentCommandBlock, executingRobot, tokens, executor, giveRobot, give);
+        return new GiveCommand(game, parentCommandBlock, executingRobot, executor, giveRobot, give);
     }
 }
