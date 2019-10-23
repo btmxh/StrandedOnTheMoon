@@ -37,21 +37,25 @@ public class GameRobot extends GameObject{
     public void go(int moveX, int moveY) {
         executor.execute(new GoCommand(game, null, robot, executor, new Vector2i(moveX, moveY)));
         super.lock();
+        super.testInterupt();
     }
     
     public void mine(int direction) {
         executor.execute(new MineCommand(game, null, robot, executor, MineCommand.Direction.values()[direction]));
         super.lock();
+        super.testInterupt();
     }
     
     public void craft(String item) {
         executor.execute(new CraftCommand(game, null, robot, executor, Recipes.getRecipe(ItemTypes.getItemByName(item))));
         super.lock();
+        super.testInterupt();
     }
     
     public void equip(EquipmentSlot slot, String item) {
         executor.execute(new EquipCommand(game, null, robot, executor, slot, (Equipment) ItemTypes.getItemByName(item)));
         super.lock();
+        super.testInterupt();
     }
     
     public void give(Robot robot, String item, double amount) {
@@ -64,6 +68,7 @@ public class GameRobot extends GameObject{
         } else giveItem = null;
         executor.execute(new GiveCommand(game, currentBlock, robot, executor, robot, giveItem));
         super.lock();
+        super.testInterupt();
     }
     
 }

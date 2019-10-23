@@ -12,6 +12,8 @@ import codinggame.map.MapTile;
 import codinggame.objs.Battery;
 import codinggame.objs.RobotInventory;
 import codinggame.objs.modules.Module;
+import codinggame.objs.modules.SolarPanelModule;
+import codinggame.objs.modules.SpeedModule;
 import codinggame.states.GameState;
 import codinggame.states.InputProcessor;
 import codinggame.ui.CodingArea;
@@ -21,15 +23,12 @@ import com.lwjglwrapper.nanovg.NVGGraphics;
 import com.lwjglwrapper.utils.IColor;
 import com.lwjglwrapper.utils.math.MathUtils;
 import java.io.Serializable;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.nanovg.NanoVG;
-import org.lwjgl.opengl.GL11;
 
 
 /**
@@ -45,10 +44,10 @@ public class Robot implements Serializable{
     protected String name;
     protected Vector2f position;
     protected RobotInventory inventory;
-    protected List<Module> modules;
     protected Battery battery;
     protected transient IColor color = IColor.LIME;
     protected transient boolean hovering;
+    protected transient boolean stop = false;
     
     private transient Object lock = new Object();
     
@@ -56,7 +55,6 @@ public class Robot implements Serializable{
         this.game = game;
         this.name = name;
         this.position = position;
-        this.modules = new ArrayList<>();
         inventory = new RobotInventory(30);
         battery = new Battery(50000, 100000);
     }
@@ -71,6 +69,11 @@ public class Robot implements Serializable{
                 game.getRobotHandler().selectRobot(this);
             } else {
                 color = color.tint(0.5f);
+            }
+        }
+        for (Module module : inventory.getModules()) {
+            if(module instanceof SolarPanelModule) {
+                ((SolarPanelModule) module).update(this, (float) LWJGL.currentLoop.getDeltaTime());
             }
         }
         MapCell cell = game.getMapHandler().getMap().getMapLayer(GameMap.ORE_LAYER).getTileAt(getTileX(), getTileY());
@@ -143,6 +146,7 @@ public class Robot implements Serializable{
     
     public void beginMoving() {
         running = true;
+        stop = false;
     }
     
     public void endMoving() {
@@ -202,6 +206,22 @@ public class Robot implements Serializable{
     
     public void createLock() {
         lock = new Object();
+    }
+
+    public boolean stopped() {
+        return stop;
+    }
+    
+    public void stopCommands() {
+        stop = true;
+    }
+
+    public float getSpeed() {
+        return (float) Stream.of(inventory.getModules())
+                .filter(SpeedModule.class::isInstance)
+                .map(SpeedModule.class::cast)
+                .mapToDouble(SpeedModule::getScale)
+                .reduce(1, (a, b) -> a*b);
     }
     
     

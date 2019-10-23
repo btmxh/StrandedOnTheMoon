@@ -5,13 +5,11 @@
  */
 package codinggame.ui;
 
-import com.lwjglwrapper.nanovg.NVGGraphics;
-import com.lwjglwrapper.nanovg.paint.AdditionalPaint;
 import com.lwjglwrapper.nanovg.paint.Paint;
+import com.lwjglwrapper.utils.geom.shapes.GLRect;
 import com.lwjglwrapper.utils.geom.shapes.Rect;
 import com.lwjglwrapper.utils.ui.Button;
 import com.lwjglwrapper.utils.ui.Stage;
-import org.joml.Rectanglef;
 import org.lwjgl.nanovg.NanoVG;
 
 /**
@@ -22,7 +20,7 @@ public class IButton extends Button {
     
     private String text = "";
     
-    public IButton(Stage stage, boolean autoAdd, Rectanglef rect, Paint[] fills, Paint stroke, Paint textPaint) {
+    public IButton(Stage stage, boolean autoAdd, GLRect rect, Paint[] fills, Paint stroke, Paint textPaint) {
         super(stage, autoAdd);
         shapes.reset().setAll(new Rect(rect))
                       .setAllStrokes(stroke)
@@ -33,9 +31,9 @@ public class IButton extends Button {
                           CodingArea.textFont.use();
                           g.beginPath();
                           g.textAlign(NanoVG.NVG_ALIGN_CENTER | NanoVG.NVG_ALIGN_MIDDLE);
-                          g.textSize((rect.maxY - rect.minY) * 0.5f);
+                          g.textSize(rect.getHeight().get() * 0.5f);
                           g.textPaint(textPaint);
-                          g.text(text, (rect.minX + rect.maxX) / 2, (rect.minY + rect.maxY) / 2);
+                          g.text(text, rect.centerX().get(), rect.centerY().get());
                       }).construct(false);
                 
     }

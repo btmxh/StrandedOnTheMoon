@@ -11,20 +11,20 @@ import com.lwjglwrapper.LWJGL;
 import com.lwjglwrapper.nanovg.NVGFont;
 import com.lwjglwrapper.nanovg.NVGGraphics;
 import com.lwjglwrapper.utils.IColor;
+import com.lwjglwrapper.utils.floats.GLFloat;
+import com.lwjglwrapper.utils.floats.GLFloats;
+import com.lwjglwrapper.utils.geom.shapes.GLRect;
 import com.lwjglwrapper.utils.geom.shapes.Rect;
 import com.lwjglwrapper.utils.geom.shapes.RoundRect;
 import com.lwjglwrapper.utils.math.MathUtils;
-import com.lwjglwrapper.utils.ui.Component;
 import com.lwjglwrapper.utils.ui.Stage;
 import com.lwjglwrapper.utils.ui.TextField;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
 import javafx.util.Pair;
 import org.joml.Rectanglef;
 import org.joml.Vector2f;
-import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWScrollCallback;
 import org.lwjgl.nanovg.NanoVG;
@@ -35,7 +35,7 @@ import org.lwjgl.nanovg.NanoVG;
  */
 public class CodingArea extends TextField {
 
-    static final float FONT_SIZE = 16, LINE_HEIGHT = FONT_SIZE * 1.25f;
+    static final float FONT_SIZE = 14, LINE_HEIGHT = FONT_SIZE * 1.25f;
     static final float OFFSET = 10;
     static final float TEXT_OFFSET = 20;
     static final float SCROLL_BAR_OFFSET = 4;
@@ -48,7 +48,7 @@ public class CodingArea extends TextField {
 
     private Caret caret;
     private String[] lines = new String[]{""};
-    private Rectanglef bounds, scissor;
+    private GLRect bounds, scissor;
     private boolean editable = true;
     private boolean lineNumbered = false;
     
@@ -65,7 +65,7 @@ public class CodingArea extends TextField {
     
     private static final int DELETE_BY_DEL_BUTTON = 2;
 
-    public CodingArea(Stage stage, Rectanglef bounds) {
+    public CodingArea(Stage stage, GLRect bounds) {
         super(stage, false);
         this.bounds = bounds;
         shapes.reset().setAll(new Rect(bounds))
@@ -76,11 +76,11 @@ public class CodingArea extends TextField {
                 .setStroke(IColor.DARKGRAY, UNSELECTED_HOVERING)
                 .setAllAfterPaints((g) -> {
                     g.push();
-                    g.translate(bounds.minX, bounds.minY);
+                    g.translate(bounds.getX().get(), bounds.getY().get());
                     verticalScrollBar.render(g);
                     horizontalScrollBar.render(g);
                     
-                    g.setScissorArea(0, 0, scissor.maxX - scissor.minX, scissor.maxY - scissor.minY);
+                    g.setScissorArea(0, 0, scissor.getWidth().get(), scissor.getHeight().get());
                     g.translate(OFFSET * 1.5f, OFFSET * 2.5f);
                     textFont.use();
                     g.textAlign(NanoVG.NVG_ALIGN_LEFT | NanoVG.NVG_ALIGN_BASELINE);
@@ -107,24 +107,36 @@ public class CodingArea extends TextField {
         super.setTextOnChangeListener((string, mode) -> {
             textFont.use();
             LWJGL.graphics.textSize(FONT_SIZE);
-            Optional<Float> maxWidth = Stream.of(lines).map(LWJGL.graphics::textLength).reduce(Float::max);
-            horizontalScrollBar.longestLineWidth = maxWidth.isPresent()? maxWidth.get():0;
             if(mode != DELETE_BY_DEL_BUTTON) {
                 int sign = mode * 2 - 1;
                 caret.characterIndex += sign * string.length();
             }
             caret.updateCaret();
         });
-        verticalScrollBar = new VerticalScrollBar(bounds.maxX - bounds.minX - OFFSET - SCROLL_BAR_OFFSET, SCROLL_BAR_OFFSET, OFFSET, bounds.maxY - bounds.minY - 2 * SCROLL_BAR_OFFSET);
-        horizontalScrollBar = new HorizontalScrollBar(SCROLL_BAR_OFFSET, bounds.maxY - bounds.minY - OFFSET - SCROLL_BAR_OFFSET,
-                bounds.maxX - bounds.minX - 2 * SCROLL_BAR_OFFSET, OFFSET);
+        verticalScrollBar = new VerticalScrollBar(
+                GLFloat.sub(bounds.getWidth(), GLFloat.memValue(OFFSET + SCROLL_BAR_OFFSET)),
+                GLFloat.memValue(SCROLL_BAR_OFFSET),
+                GLFloat.memValue(OFFSET),
+                GLFloat.sub(bounds.getHeight(), GLFloat.memValue(SCROLL_BAR_OFFSET * 2))
+        );
+        horizontalScrollBar = new HorizontalScrollBar(
+                GLFloat.memValue(SCROLL_BAR_OFFSET),
+                GLFloat.sub(bounds.getHeight(), GLFloat.memValue(OFFSET + SCROLL_BAR_OFFSET)),
+                GLFloat.sub(bounds.getWidth(), GLFloat.memValue(SCROLL_BAR_OFFSET * 2)),
+                GLFloat.memValue(OFFSET)
+        );
         stage.window.getMouse().getScrollCallback().add(new GLFWScrollCallback() {
             @Override
             public void invoke(long window, double xoffset, double yoffset) {
                 verticalScrollBar.scroll(yoffset);
             }
         });
-        scissor = new Rectanglef(0, 0, bounds.maxX - bounds.minX - OFFSET - SCROLL_BAR_OFFSET * 2, bounds.maxY - bounds.minY - OFFSET - SCROLL_BAR_OFFSET * 2);
+        scissor = new GLRect(
+                GLFloats.ZERO,
+                GLFloats.ZERO,
+                GLFloat.sub(bounds.getWidth(), GLFloat.memValue(OFFSET + SCROLL_BAR_OFFSET * 2)),
+                GLFloat.sub(bounds.getHeight(), GLFloat.memValue(OFFSET + SCROLL_BAR_OFFSET * 2))
+        );
         
     }
 
@@ -157,9 +169,9 @@ public class CodingArea extends TextField {
             appendText("\t");
         }
         if(LWJGL.mouse.mouseReleased(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
-            caret.goTo(LWJGL.mouse.getCursorX() - bounds.minX - OFFSET * 1.5f - (lineNumbered? TEXT_OFFSET:0), LWJGL.mouse.getCursorY() - bounds.minY - OFFSET * 2.5f + verticalScrollBar.calculateShiftAmount());
+            caret.goTo(LWJGL.mouse.getCursorX() - bounds.getX().get() - OFFSET * 1.5f - (lineNumbered? TEXT_OFFSET:0), LWJGL.mouse.getCursorY() - bounds.getY().get() - OFFSET * 2.5f + verticalScrollBar.calculateShiftAmount());
         }
-        }
+    }
 
     @Override
     public void appendText(String append) {
@@ -200,7 +212,12 @@ public class CodingArea extends TextField {
 
     @Override
     public void render(NVGGraphics g) {
-        scissor = new Rectanglef(0, 0, bounds.maxX - bounds.minX - OFFSET - SCROLL_BAR_OFFSET * 2, bounds.maxY - bounds.minY - OFFSET - SCROLL_BAR_OFFSET * 2);
+        scissor = new GLRect(
+                GLFloats.ZERO,
+                GLFloats.ZERO,
+                GLFloat.sub(bounds.getWidth(), GLFloat.memValue(OFFSET + SCROLL_BAR_OFFSET * 2)),
+                GLFloat.sub(bounds.getHeight(), GLFloat.memValue(OFFSET + SCROLL_BAR_OFFSET * 2))
+        );
         super.render(g);
     }
 
@@ -269,15 +286,15 @@ public class CodingArea extends TextField {
             Vector2f p1 = new Vector2f(ux, y1);
             Vector2f p2 = new Vector2f(ux, y2);
             //Rect scissor = new Rect(CodingArea.this.scissor);
-            if(ux < scissor.minX) {
-                float shift = ux - scissor.minX + 10;
+            if(ux < scissor.getX().get()) {
+                float shift = ux - scissor.getX().get() + 10;
                 horizontalScrollBar.shift(-shift);
-            } else if(x > scissor.maxX) {
-                float shift = scissor.maxX - ux - 1000;
+            } else if(x > scissor.getMaxX().get()) {
+                float shift = scissor.getMaxX().get() - ux - 1000;
                 horizontalScrollBar.shift(-shift);
             }
-            if(y1 < scissor.minY) {
-                float shift = scissor.minY - y2 + 10;
+            if(y1 < scissor.getY().get()) {
+                float shift = scissor.getY().get() - y2 + 10;
                 verticalScrollBar.shift(-shift);
             }
         }
@@ -353,8 +370,8 @@ public class CodingArea extends TextField {
     }
     
     public class VerticalScrollBar {
-        private float orgX, orgY;
-        private float width, height;
+        private GLFloat orgX, orgY;
+        private GLFloat width, height;
         private float shiftRatio;
         
         private Rect currentBounds;
@@ -363,8 +380,8 @@ public class CodingArea extends TextField {
         
         private boolean scrollDisabled;
 
-        public VerticalScrollBar(float orgX, float orgY, float width,
-                float height) {
+        public VerticalScrollBar(GLFloat orgX, GLFloat orgY, GLFloat width,
+                GLFloat height) {
             this.orgX = orgX;
             this.orgY = orgY;
             this.width = width;
@@ -375,18 +392,18 @@ public class CodingArea extends TextField {
 
         public void tick() {
             float totalHeight = lines.length * LINE_HEIGHT;
-            scrollDisabled = bounds.maxY - bounds.minY - OFFSET * 1.5f >= totalHeight;
+            scrollDisabled = bounds.getHeight().get() - OFFSET * 1.5f >= totalHeight;
             if(scrollDisabled) {
                 shiftRatio = 0;
                 return;
             }
-            float barHeight = (bounds.maxY - bounds.minY) / totalHeight * height;
-            float barWidth = width;
-            float barX = orgX;
-            float mgtY = height - barHeight;
-            float barY = orgY + mgtY * shiftRatio;
-            currentBounds = new RoundRect(barX, barY, barWidth, barHeight, 2f);
-            Vector2f vector = detransformedMousePosition.sub(bounds.minX, bounds.minY, new Vector2f());
+            GLFloat barHeight = GLFloat.mul(GLFloat.div(bounds.getHeight(), GLFloat.memValue(totalHeight)), height);
+            GLFloat barWidth = width;
+            GLFloat barX = orgX;
+            GLFloat mgtY = GLFloat.sub(height, barHeight);
+            GLFloat barY = GLFloat.add(orgY, GLFloat.mul(mgtY, GLFloat.memValue(shiftRatio)));
+            currentBounds = new RoundRect(barX, barY, barWidth, barHeight, GLFloat.memValue(2));
+            Vector2f vector = detransformedMousePosition.sub(bounds.getX().get(), bounds.getY().get(), new Vector2f());
             boolean contains = currentBounds.contains(vector);
             if(contains) {
                 stage.setStandardCursor(GLFW.GLFW_ARROW_CURSOR);
@@ -419,13 +436,13 @@ public class CodingArea extends TextField {
 
         private float calculateShiftAmount() {
             float totalHeight = lines.length * LINE_HEIGHT;
-            return shiftRatio * (totalHeight - bounds.maxY + bounds.minY + OFFSET * 2.5f);
+            return shiftRatio * (totalHeight - bounds.getHeight().get() + OFFSET * 2.5f);
         }
 
         private void scroll(double yoffset) {
             if(scrollDisabled)   return;
             if(CodingGame.getInstance().gs.getInputProcessor() != InputProcessor.GAME_UI)   return;
-            if(!new Rect(bounds).contains(LWJGL.mouse.getCursorPosition())) return;
+            if(!MathUtils.contains(bounds.getJOMLRect(), LWJGL.mouse.getCursorPosition())) return;
             shiftRatio -= yoffset * 0.05f;
             shiftRatio = MathUtils.clamp(0f, shiftRatio, 1f);
         }
@@ -436,8 +453,8 @@ public class CodingArea extends TextField {
     }
     
     public class HorizontalScrollBar {
-        private float orgX, orgY;
-        private float width, height;
+        private GLFloat orgX, orgY;
+        private GLFloat width, height;
         private float shiftRatio;
         
         private Rect currentBounds;
@@ -447,8 +464,8 @@ public class CodingArea extends TextField {
         private boolean scrollDisabled;
         private float longestLineWidth;
 
-        public HorizontalScrollBar(float orgX, float orgY, float width,
-                float height) {
+        public HorizontalScrollBar(GLFloat orgX, GLFloat orgY, GLFloat width,
+                GLFloat height) {
             this.orgX = orgX;
             this.orgY = orgY;
             this.width = width;
@@ -458,19 +475,20 @@ public class CodingArea extends TextField {
         }
 
         public void tick() {
-//            float totalWidth = lines.length * LINE_HEIGHT;
-            scrollDisabled = bounds.maxX - bounds.minX - OFFSET * 2.5f >= longestLineWidth;
+            Optional<Float> maxWidth = Stream.of(lines).map(LWJGL.graphics::textLength).reduce(Float::max);
+            longestLineWidth = maxWidth.isPresent()? maxWidth.get():0;
+            scrollDisabled = bounds.getWidth().get() - OFFSET * 2.5f >= longestLineWidth;
             if(scrollDisabled) {
                 shiftRatio = 0;
                 return;
             }
-            float barHeight = height;
-            float barWidth = (bounds.maxX - bounds.minX) / longestLineWidth * width;
-            float mgtX = width - barWidth;
-            float barX = orgX + mgtX * shiftRatio;
-            float barY = orgY;
-            currentBounds = new RoundRect(barX, barY, barWidth, barHeight, 2f);
-            Vector2f vector = detransformedMousePosition.sub(bounds.minX, bounds.minY, new Vector2f());
+            GLFloat barHeight = height;
+            GLFloat barWidth = GLFloat.mul(bounds.getWidth(), GLFloat.memValue(width.get() / longestLineWidth));
+            GLFloat mgtX = GLFloat.sub(width, barWidth);
+            GLFloat barX = GLFloat.add(orgX, GLFloat.mul(mgtX, GLFloat.memValue(shiftRatio)));
+            GLFloat barY = orgY;
+            currentBounds = new RoundRect(barX, barY, barWidth, barHeight, GLFloat.memValue(2f));
+            Vector2f vector = detransformedMousePosition.sub(bounds.getX().get(), bounds.getY().get(), new Vector2f());
             boolean contains = currentBounds.contains(vector);
             if(contains) {
                 stage.setStandardCursor(GLFW.GLFW_ARROW_CURSOR);
@@ -489,7 +507,6 @@ public class CodingArea extends TextField {
                 shiftRatio = savedShiftAmount + (LWJGL.mouse.getCursorX() - savedCursorX) * .005f;
                 shiftRatio = MathUtils.clamp(0f, shiftRatio, 1f);
             }
-            
         }
         
         public void render(NVGGraphics g) {
@@ -500,12 +517,12 @@ public class CodingArea extends TextField {
         }
 
         private float calculateShiftAmount() {
-            float shift = shiftRatio * (longestLineWidth - bounds.maxX + bounds.minX + OFFSET * 2.5f);
+            float shift = shiftRatio * (longestLineWidth - bounds.getWidth().get() + OFFSET * 2.5f);
             return shift;
         }
 
         private void shift(float amt) {
-            shiftRatio += amt / (longestLineWidth - bounds.maxX + bounds.minX + OFFSET * 2.5f);
+            shiftRatio += amt / (longestLineWidth - bounds.getWidth().get() + OFFSET * 2.5f);
             shiftRatio = MathUtils.clamp(0f, shiftRatio, 1f);
         }
     }

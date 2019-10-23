@@ -6,6 +6,7 @@
 package codinggame.objs.robots;
 
 import codinggame.objs.items.ItemTypes;
+import static codinggame.objs.items.ItemTypes.OLD_DRILL;
 import codinggame.objs.items.equipments.Drill;
 import codinggame.objs.items.equipments.EquipmentSlot;
 import codinggame.states.GameState;
@@ -20,7 +21,7 @@ public class MinerRobot extends Robot{
     
     public MinerRobot(GameState game, Vector2f position, String name) {
         super(game, position, name);
-        inventory.equip(EquipmentSlot.DRILL, new Drill(ItemTypes.IRON_DRILL));
+        inventory.equip(EquipmentSlot.DRILL, new Drill(ItemTypes.OLD_DRILL));
     }
 
     public void setDrill(Drill drill) {

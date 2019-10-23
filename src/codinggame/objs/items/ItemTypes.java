@@ -5,6 +5,9 @@
  */
 package codinggame.objs.items;
 
+import codinggame.chemistry.Element;
+import codinggame.chemistry.ElementGroup;
+import codinggame.chemistry.MultiElementGroup;
 import codinggame.objs.items.equipments.Drill;
 import com.lwjglwrapper.opengl.objects.Texture2D;
 import com.lwjglwrapper.opengl.objects.TextureData;
@@ -21,7 +24,7 @@ import org.lwjgl.opengl.GL13;
 public class ItemTypes {
     public static ItemType.Mass COPPER_ORE, MOON_ROCK;
     public static ItemType.Count COTEST1, COTEST2;
-    public static Drill.Type IRON_DRILL, TITANIUM_DRILL, COPPER_DRILL;
+    public static Drill.Type IRON_DRILL, TITANIUM_DRILL, COPPER_DRILL, OLD_DRILL;
     
     public static void initTypes() {
         COPPER_ORE = create("copper_ore", "Copper Ore");
@@ -30,7 +33,23 @@ public class ItemTypes {
         IRON_DRILL = new Drill.Type("/items/iron_drill.png", "Iron Drill", 1);
         COPPER_DRILL = new Drill.Type("/items/copper_drill.png", "Copper Drill", 1.25f);
         TITANIUM_DRILL = new Drill.Type("/items/titanium_drill.png", "Titanium Drill", 1.5f);
-        MOON_ROCK = create("moon_rock", "Moon Rock");
+        OLD_DRILL = new Drill.Type("/items/old_drill.png", "Old Drill", 0.75f);
+        MOON_ROCK = new ItemType.Mass("/items/moon_rock.png", "Moon Rock"){
+            private ElementGroup compound;
+            
+            @Override
+            public ElementGroup getCompound() {
+                if(compound == null) {
+                    compound = new MultiElementGroup().
+                            put(Element.O, 0.6f).
+                            put(Element.Si, 0.2f).
+                            put(Element.Fe, 0.1f).
+                            put(Element.Al, 0.05f).
+                            put(Element.Ca, 0.05f);
+                }
+                return compound;
+            }
+        };
     }
     
     private static ItemType.Mass create(String path, String name) {

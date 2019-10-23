@@ -5,6 +5,8 @@
  */
 package codinggame.objs.items;
 
+import codinggame.chemistry.Compound;
+import codinggame.chemistry.ElementGroup;
 import com.lwjglwrapper.LWJGL;
 import com.lwjglwrapper.nanovg.NVGImage;
 import com.lwjglwrapper.opengl.objects.Texture2D;
@@ -22,7 +24,7 @@ import org.lwjgl.opengl.GL13;
  *
  * @author Welcome
  */
-public class ItemType implements Serializable{
+public abstract class ItemType implements Serializable, Compound{
     private transient NVGImage nvgTexture;
     private transient final Texture2D texture;
     private final String name;
@@ -64,6 +66,11 @@ public class ItemType implements Serializable{
         public Mass(String path, String name) {
             super(path, name);
         }
+
+        @Override
+        public ElementGroup getCompound() {
+            throw new UnsupportedOperationException();
+        }
         
     }
     
@@ -78,6 +85,11 @@ public class ItemType implements Serializable{
         
         public double getMassPerItem() {
             return massPerItem;   
+        }
+
+        @Override
+        public ElementGroup getCompound() {
+            throw new UnsupportedOperationException();
         }
     }
 

@@ -95,13 +95,15 @@ public class CodingGame extends GameStateLoop {
 
     
     
+    public static String arg;
+    
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-            //        new Thread(() -> {
-            //            while(true);
-            //        }).start();
+        if(args.length > 0) {
+            arg = args[0];
+        }
         new CodingGame().run();
     }
 

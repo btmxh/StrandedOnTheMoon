@@ -32,15 +32,18 @@ public class GameObject {
     
     public void println(Object obj) {
         game.getUIHandler().println(obj == null? "null":obj.toString());
+        testInterupt();
     }
     
     public void print(Object obj) {
         game.getUIHandler().print(obj == null? "null":obj.toString());
+        testInterupt();
     }
     
-    public void wait(float time) {
+    public void waitFor(float time) {
         executor.execute(new WaitCommand(game, currentBlock, robot, executor, time));
         lock();
+        testInterupt();
     }
     
     void lock() {
@@ -51,6 +54,16 @@ public class GameObject {
             } catch (InterruptedException ex) {
                 Logger.getLogger(GameObject.class.getName()).log(Level.SEVERE, null, ex);
             }
+        }
+    }
+    
+    public void addTime(long time) {
+        game.getClock().update(time / 1000f);
+    }
+    
+    void testInterupt() {
+        if(robot.stopped()) {
+            Thread.currentThread().interrupt();
         }
     }
 }

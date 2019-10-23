@@ -28,7 +28,8 @@ public class SolarPanelModule extends Module{
         Clock clock = game.getClock();
         int hour = clock.getHour();
         float timeFactor = Math.abs(12 - hour) / 7.0f;
-        final float BASE = 0.8f;
+        if(timeFactor > 1)  return;
+        final float BASE = 0.5f;
         float chanceScale = BASE + (1 - BASE) * timeFactor;
         if(Math.random() * chanceScale < chance * delta) {
             robot.getBattery().increase(amount);

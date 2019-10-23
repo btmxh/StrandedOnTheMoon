@@ -17,6 +17,7 @@ import codinggame.objs.Clock;
 import codinggame.objs.items.ItemTypes;
 import codinggame.objs.modules.ModuleTextures;
 import codinggame.objs.modules.SolarPanelModule;
+import codinggame.objs.modules.SpeedModule;
 import codinggame.objs.robots.CraftingRobot;
 import codinggame.objs.robots.MinerRobot;
 import com.lwjglwrapper.LWJGL;
@@ -28,10 +29,12 @@ import com.lwjglwrapper.opengl.objects.Texture2D;
 import com.lwjglwrapper.utils.IColor;
 import com.lwjglwrapper.utils.Logger;
 import com.lwjglwrapper.utils.states.State;
+import java.util.logging.Level;
 import org.joml.Rectanglef;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWCharCallback;
+import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.glfw.GLFWWindowCloseCallback;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
@@ -47,6 +50,7 @@ public class GameState extends State<CodingGame>{
 //    private GameMap map;
 //    private MapRenderer renderer;
     //FBOs
+    boolean recreateFBO = true;
     FBO gameFBO;
     Texture2D gameTexture;
     //Camera, Viewport
@@ -88,23 +92,18 @@ public class GameState extends State<CodingGame>{
         camera = new Camera();
         robotHandler = new RobotHandler(this, camera);
         
-        if(!robotHandler.loadRobots(this)) {
+        if(!robotHandler.loadRobots(this) | true) {
             robotHandler.addRobot(new MinerRobot(this, new Vector2f(10.5f, 10.5f), "miner"), true);
             robotHandler.addRobot(new CraftingRobot(this, new Vector2f(7.5f, 5.5f), "crafter"), false);
         }
         robotHandler.getRobot("miner").getInventory().setModule(0, new SolarPanelModule(this, 0.2, 1));
+        robotHandler.getRobot("miner").getInventory().setModule(1, new SpeedModule(this));
+        robotHandler.getRobot("miner").getInventory().setModule(2, new SpeedModule(this));
+        robotHandler.getRobot("miner").getInventory().setModule(3, new SpeedModule(this));
         
         gameUIHandler = new GameUIHandler(LWJGL.window, this);
         commandHandler = new CommandHandler(this);
         
-        gameFBO = new FBO(GL30.GL_FRAMEBUFFER);
-        gameFBO.bind();
-        
-        RBO rbo = new RBO(GL30.GL_DEPTH24_STENCIL8, LWJGL.window.getWidth(), LWJGL.window.getHeight());
-        gameFBO.attachRBO(GL30.GL_DEPTH_STENCIL_ATTACHMENT, rbo);
-        gameTexture = gameFBO.createTexture();
-        gameFBO.checkProgress(System.out, true);
-        gameFBO.unbind();
     }
 
     @Override
@@ -136,6 +135,10 @@ public class GameState extends State<CodingGame>{
 
     @Override
     public void render() {
+        if(gameFBO == null | recreateFBO) {
+            resize(LWJGL.window.getWidth(), LWJGL.window.getHeight());
+            recreateFBO = false;
+        }
         GLCalls.setClearColor(new IColor(0.1f));
         GLCalls.enable(GL11.GL_SCISSOR_TEST);
         GLCalls.clear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_STENCIL_BUFFER_BIT);
@@ -153,6 +156,11 @@ public class GameState extends State<CodingGame>{
         LWJGL.graphics.begin();
         LWJGL.graphics.rect(0, 0, LWJGL.window.getWidth(), LWJGL.window.getHeight());
         LWJGL.graphics.fill(IColor.BLACK);
+        
+        LWJGL.graphics.rect(0, 0, 100, 100);
+        LWJGL.graphics.fill(IColor.RED);
+        
+        
         LWJGL.graphics.end();
         
         mapHandler.render(!robotHandler.hoveringOnRobots() && inputProcessor == InputProcessor.GAME);
@@ -217,6 +225,27 @@ public class GameState extends State<CodingGame>{
 
     public InputProcessor getInputProcessor() {
         return inputProcessor;
+    }
+    
+    public void resize(int width, int height) {
+        LWJGL.graphics.updateSize(width, height);
+        windowViewport = new Viewport(0, 0, width, height);
+        if(gameFBO != null) gameFBO.dispose();
+        gameFBO = new FBO(GL30.GL_FRAMEBUFFER);
+        gameFBO.bind();
+        
+        System.out.println(width + " " + height);
+        
+        RBO rbo = new RBO(GL30.GL_DEPTH24_STENCIL8, width, height);
+        gameFBO.attachRBO(GL30.GL_DEPTH_STENCIL_ATTACHMENT, rbo);
+        gameTexture = gameFBO.createTexture();
+        gameFBO.checkProgress(System.out, true);
+        gameFBO.unbind();
+        
+    }
+
+    public void resize() {
+        recreateFBO = true;
     }
     
 }

@@ -69,8 +69,8 @@ public class CommandHandler {
     
     public void execute(Command command) {
         if(command == null) return;
-        commands.add(command);
         command.begin();
+        commands.add(command);
     }
     
     public void addThread(Robot robot, Thread thread) {
@@ -90,5 +90,9 @@ public class CommandHandler {
         GameUIHandler uiHandler = CodingGame.getInstance().gs.getUIHandler();
         uiHandler.println("Execution error: " + description);
         Command.getRootCommandBlock(command).stop();
+    }
+
+    public void stop(Robot currentRobot) {
+        threads.get(currentRobot).interrupt();
     }
 }

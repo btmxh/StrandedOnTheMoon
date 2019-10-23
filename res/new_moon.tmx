@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.2" tiledversion="1.2.5" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="1">
- <tileset firstgid="1" name="tileset" tilewidth="32" tileheight="32" tilecount="7" columns="0">
+ <tileset firstgid="1" name="tileset" tilewidth="32" tileheight="32" tilecount="8" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
   <tile id="0">
    <image width="32" height="32" source="tiles/ore_copper_moon.png"/>
@@ -22,6 +22,9 @@
   </tile>
   <tile id="7">
    <image width="32" height="32" source="tiles/central_storage_unit.png"/>
+  </tile>
+  <tile id="8">
+   <image width="32" height="32" source="tiles/chemical_processor.png"/>
   </tile>
  </tileset>
  <layer id="1" name="Turf Layer" width="20" height="20">
@@ -58,7 +61,7 @@
 0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,4,6,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,4,6,9,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,1,8,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,

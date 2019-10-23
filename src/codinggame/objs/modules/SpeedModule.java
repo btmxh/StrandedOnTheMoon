@@ -14,7 +14,7 @@ import codinggame.states.GameState;
  */
 public class SpeedModule extends Module{
     
-    private static final float DEFAULT_SCALE = 1.2f;
+    private static final float DEFAULT_SCALE = 10.2f;
     
     private float scale = DEFAULT_SCALE;
     

@@ -30,14 +30,15 @@ public class GoCommand extends Command{
     public GoCommand(GameState game, CommandBlock parentCommandBlock, Robot executingRobot, CommandHandler executor, Vector2i move) {
         super(game, parentCommandBlock, executingRobot, executor);
         this.move = move;
-        setMaxTime((float) (move.length() * 1f));
         setEnergyConsumption((int) (move.length() * 1));
     }
 
     @Override
     public void begin() {
         super.begin();
+        setMaxTime((float) move.length() / executingRobot.getSpeed());
         destination = new Vector2f(executingRobot.getPosition()).add(move.x, move.y);
+        System.out.println(destination);
     }
 
     @Override
