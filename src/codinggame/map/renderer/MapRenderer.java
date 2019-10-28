@@ -12,9 +12,11 @@ import codinggame.map.MapCell;
 import codinggame.map.MapLayer;
 import codinggame.map.cells.ColoredCell;
 import codinggame.map.cells.FacingCell;
+import codinggame.map.cells.SheetCell;
 import codinggame.map.cells.renderers.CellRenderer;
 import codinggame.map.cells.renderers.FacingCellRenderer;
 import codinggame.map.cells.renderers.GlassRenderer;
+import codinggame.map.cells.renderers.SheetRenderer;
 import codinggame.map.proceduralmap.ProcMapCell;
 import codinggame.objs.buildings.Building;
 import com.lwjglwrapper.LWJGL;
@@ -38,11 +40,13 @@ public class MapRenderer {
     protected CellRenderer defaultCellRenderer;
     protected FacingCellRenderer facingCellRenderer;
     protected GlassRenderer glassRenderer;
+    protected SheetRenderer sheetRenderer;
     
     public MapRenderer() {
         defaultCellRenderer = new CellRenderer();
         facingCellRenderer = new FacingCellRenderer();
         glassRenderer = new GlassRenderer();
+        sheetRenderer = new SheetRenderer();
         
         if(VAO == null) {
             VAO = new VAO();
@@ -103,6 +107,9 @@ public class MapRenderer {
             } else if(cell instanceof ColoredCell) {
                 putList(specialCells, LinkedList::new, glassRenderer, new Pair<>(new Point(x, y), (ProcMapCell) cell));
                 return;
+            } else if(cell instanceof SheetCell) {
+                putList(specialCells, LinkedList::new, sheetRenderer, new Pair<>(new Point(x, y), (ProcMapCell) cell));
+                return;
             }
         } 
         defaultCellRenderer.renderCell(mapHandler, layerOrBuilding, cell, x, y, cursorPosition, hover);
@@ -112,12 +119,14 @@ public class MapRenderer {
         defaultCellRenderer.setTileSize(viewport, tileWidth, tileHeight);
         facingCellRenderer.setTileSize(viewport, tileWidth, tileHeight);
         glassRenderer.setTileSize(viewport, tileWidth, tileHeight);
+        sheetRenderer.setTileSize(viewport, tileWidth, tileHeight);
     }
     
     public void setOriginPosition(float x, float y) {
         defaultCellRenderer.setOriginPosition(x, y);
         facingCellRenderer.setOriginPosition(x, y);
         glassRenderer.setOriginPosition(x, y);
+        sheetRenderer.setOriginPosition(x, y);
     }
     
     private static <K, V> void putList(Map<K, List<V>> map, Supplier<? extends List<V>> supplier, K key, V value) {

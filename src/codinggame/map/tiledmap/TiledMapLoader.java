@@ -92,7 +92,7 @@ public class TiledMapLoader {
             for (int x = 0; x < ids.length; x++) {
                 if(ids[x].isEmpty())    continue;
                 int id = Integer.parseInt(ids[x]);
-                layer.setTileAt(x, y, tilesets.getTileByID(id));
+                layer.setTileAt(x, y, tilesets.<MapTile>getTileByID(id));
             }
         }
         layer.setID(layerID);

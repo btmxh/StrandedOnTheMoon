@@ -22,7 +22,7 @@ import java.util.logging.Logger;
  */
 public class ItemTypes {
     public static ItemType.Mass COPPER_ORE, MOON_ROCK;
-    public static ItemType.Count COTEST1, COTEST2;
+    public static ItemType.Count COTEST1, COTEST2, WHEAT_SEED_BAG;
     public static Drill.Type IRON_DRILL, TITANIUM_DRILL, COPPER_DRILL, OLD_DRILL;
     public static Hoe.Type IRON_HOE, TITANIUM_HOE, COPPER_HOE, OLD_HOE;
     
@@ -54,6 +54,7 @@ public class ItemTypes {
         COPPER_HOE = new Hoe.Type("/items/copper_hoe.png", "Copper Hoe", 1.25f);
         TITANIUM_HOE = new Hoe.Type("/items/titanium_hoe.png", "Titanium Hoe", 1.5f);
         OLD_HOE = new Hoe.Type("/items/old_hoe.png", "Old Hoe", 0.75f);
+        WHEAT_SEED_BAG = new ItemType.Count("/items/wheat_seed_bag.png", "Wheat Seed Bag", 2f);
     }
     
     private static ItemType.Mass create(String path, String name) {

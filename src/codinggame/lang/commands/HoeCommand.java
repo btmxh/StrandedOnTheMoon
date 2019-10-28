@@ -37,12 +37,10 @@ public class HoeCommand extends Command{
         } else {
             executor.throwExecutionError(this, "This robot is not a farming robot");
         }
-        System.out.println("codinggame.lang.commands.HoeCommand.<init>()");
     }
 
     @Override
     public void end() {
-        System.out.println("codinggame.lang.commands.HoeCommand.end()");
         MapLayer layer = game.getMapHandler().getMap().getMapLayer(GameMap.TURF_LAYER);
         MapCell cell = layer.getTileAt(executingRobot.getTileX(), executingRobot.getTileY());
         if(cell == null? true:cell.getTileType() == null? true:cell.getTileType().getID() != MapTile.MOON_TURF) {
@@ -56,7 +54,6 @@ public class HoeCommand extends Command{
     @Override
     public void begin() {
         super.begin();
-        System.out.println("codinggame.lang.commands.HoeCommand.begin()");
         if(!(executingRobot instanceof FarmingRobot)) {
             executor.throwExecutionError(this, "This robot is not a farming robot");
         }

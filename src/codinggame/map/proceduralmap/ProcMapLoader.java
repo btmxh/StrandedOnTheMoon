@@ -8,6 +8,7 @@ package codinggame.map.proceduralmap;
 import codinggame.map.GameMap;
 import codinggame.map.MapLayers;
 import codinggame.map.MapTile;
+import codinggame.map.MapTileSheet;
 import codinggame.map.MapTileset;
 import codinggame.map.MapTilesets;
 import codinggame.map.cells.DataCell;
@@ -52,17 +53,37 @@ public class ProcMapLoader {
         
         int firstgid = Integer.parseInt(lines.get(0));
         for (int i = 1; i < lines.size(); i++) {
-            String[] properties = lines.get(i).split("\\s+", 2);
+            String[] properties = lines.get(i).split("\\s+", -1);
+            if(properties[1].equalsIgnoreCase("sheet")) {
+                properties = lines.get(i).split("\\s+", 5);
+            } else {
+                properties = lines.get(i).split("\\s+", 2);
+            }
             String path = textureDirectory + "/" + properties[1];
             int id = Integer.parseInt(properties[0]) + firstgid;
             
-            tileset.addTile(new MapTile(id, new Texture2D(TextureData.fromResource(ProcMapLoader.class, path)){
-                @Override
-                public void configTexture(int id) {
-                    GL11.glTexParameteri(textureType, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-                    GL11.glTexParameteri(textureType, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-                }
-            }));
+            if(properties[1].equalsIgnoreCase("sheet")) {
+                path = textureDirectory + "/" + properties[4];
+                int noOfCols = Integer.parseInt(properties[2]);
+                int noOfRows = Integer.parseInt(properties[3]);
+                
+                tileset.addTile(new MapTileSheet(noOfRows, noOfCols, id, new Texture2D(TextureData.fromResource(ProcMapLoader.class, path)){
+                    @Override
+                    public void configTexture(int id) {
+                        GL11.glTexParameteri(textureType, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+                        GL11.glTexParameteri(textureType, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+                    }
+                }));
+            } else {
+                System.out.println(path);
+                tileset.addTile(new MapTile(id, new Texture2D(TextureData.fromResource(ProcMapLoader.class, path)){
+                    @Override
+                    public void configTexture(int id) {
+                        GL11.glTexParameteri(textureType, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+                        GL11.glTexParameteri(textureType, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+                    }
+                }));
+            }
 //            tileset.addTile(new MapTile(id, null));
         }
         

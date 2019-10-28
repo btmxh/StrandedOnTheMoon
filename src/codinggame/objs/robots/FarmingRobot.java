@@ -21,7 +21,6 @@ public class FarmingRobot extends Robot{
     public FarmingRobot(GameState game, Vector2f position, String name) {
         super(game, position, name);
         inventory.equip(EquipmentSlot.HOE, new Hoe(ItemTypes.OLD_HOE));
-        
     }
     
 }

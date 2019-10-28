@@ -6,19 +6,10 @@
 package codinggame.map.cells.renderers;
 
 import codinggame.handlers.MapHandler;
-import codinggame.map.GameMap;
 import codinggame.map.MapCell;
-import codinggame.map.MapTile;
 import codinggame.map.cells.ColoredCell;
-import static codinggame.map.renderer.MapRenderer.VAO;
-import com.lwjglwrapper.LWJGL;
 import com.lwjglwrapper.opengl.shaders.uniforms.variables.UVec4;
-import com.lwjglwrapper.utils.IColor;
-import com.lwjglwrapper.utils.Logger;
 import org.joml.Vector2f;
-import org.joml.Vector4f;
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
 
 /**
  *

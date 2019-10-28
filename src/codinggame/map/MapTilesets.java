@@ -16,10 +16,10 @@ public class MapTilesets {
         this.tilesets = tilesets;
     }
     
-    public MapTile getTileByID(int id) {
+    public <T extends MapTile> T getTileByID(int id) {
         for (MapTileset tileset : tilesets) {
             if(!tileset.containsTile(id))   continue;
-            return tileset.getTile(id);
+            return (T) tileset.getTile(id);
         }
         return null;
     }

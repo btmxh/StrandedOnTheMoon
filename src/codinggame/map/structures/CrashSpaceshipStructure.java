@@ -12,6 +12,7 @@ import codinggame.map.cells.ChemistryCell;
 import codinggame.map.cells.ColoredCell;
 import codinggame.map.cells.FacingCell;
 import codinggame.map.cells.InventoryCell;
+import codinggame.map.cells.SheetCell;
 import codinggame.map.proceduralmap.ProcMapCell;
 import codinggame.objs.items.ItemTypes;
 import codinggame.objs.items.equipments.Drill;
@@ -43,6 +44,10 @@ public class CrashSpaceshipStructure extends Structure{
         tileMap.put(new Point(0, 2), new ChemistryCell(tileset.getTileByID(MapTile.CHEMICAL_PROCESSOR)));
         tileMap.put(new Point(0, 3), new ColoredCell(IColor.LIME.alpha(0.15f), tileset.getTileByID(MapTile.GLASS)));
         tileMap.put(new Point(0, 4), new FacingCell(tileset.getTileByID(MapTile.CONVEYOR)));
+        tileMap.put(new Point(0, 5), new SheetCell(tileset.getTileByID(MapTile.WHEAT_CROPS), 0));
+        tileMap.put(new Point(0, 6), new SheetCell(tileset.getTileByID(MapTile.WHEAT_CROPS), 1));
+        tileMap.put(new Point(0, 7), new SheetCell(tileset.getTileByID(MapTile.WHEAT_CROPS), 2));
+        tileMap.put(new Point(0, 8), new SheetCell(tileset.getTileByID(MapTile.WHEAT_CROPS), 3));
         
         return tileMap;
     }

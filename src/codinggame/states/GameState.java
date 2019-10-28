@@ -18,6 +18,7 @@ import codinggame.map.proceduralmap.chunkloading.ChunkThread;
 import codinggame.objs.Clock;
 import codinggame.objs.buildings.Building;
 import codinggame.objs.buildings.Greenhouse;
+import codinggame.objs.items.CountItem;
 import codinggame.objs.items.ItemTypes;
 import codinggame.objs.modules.SolarPanelModule;
 import codinggame.objs.modules.SpeedModule;
@@ -100,9 +101,10 @@ public class GameState extends State<CodingGame>{
         if(!robotHandler.loadRobots(this) | true) {
             robotHandler.addRobot(new MinerRobot(this, new Vector2f(10.5f, 10.5f), "miner"), true);
             robotHandler.addRobot(new CraftingRobot(this, new Vector2f(7.5f, 5.5f), "crafter"), false);
+        robotHandler.addRobot(new FarmingRobot(this, new Vector2f(7.5f, 10.5f), "farmer"), false);
         }
         robotHandler.getRobot("miner").getInventory().setModule(0, new SolarPanelModule(this, 0.2, 1));
-            robotHandler.addRobot(new FarmingRobot(this, new Vector2f(7.5f, 10.5f), "farmer"), false);
+        robotHandler.getRobot("farmer").getInventory().add(new CountItem(ItemTypes.WHEAT_SEED_BAG, 10));
         
         gameUIHandler = new GameUIHandler(LWJGL.window, this);
         commandHandler = new CommandHandler(this);
