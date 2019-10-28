@@ -9,13 +9,12 @@ import codinggame.chemistry.Element;
 import codinggame.chemistry.ElementGroup;
 import codinggame.chemistry.MultiElementGroup;
 import codinggame.objs.items.equipments.Drill;
-import com.lwjglwrapper.opengl.objects.Texture2D;
-import com.lwjglwrapper.opengl.objects.TextureData;
+import codinggame.objs.items.equipments.Hoe;
+import codinggame.objs.modules.Module;
 import java.lang.reflect.Field;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL13;
 
 /**
  *
@@ -25,6 +24,7 @@ public class ItemTypes {
     public static ItemType.Mass COPPER_ORE, MOON_ROCK;
     public static ItemType.Count COTEST1, COTEST2;
     public static Drill.Type IRON_DRILL, TITANIUM_DRILL, COPPER_DRILL, OLD_DRILL;
+    public static Hoe.Type IRON_HOE, TITANIUM_HOE, COPPER_HOE, OLD_HOE;
     
     public static void initTypes() {
         COPPER_ORE = create("copper_ore", "Copper Ore");
@@ -50,6 +50,10 @@ public class ItemTypes {
                 return compound;
             }
         };
+        IRON_HOE = new Hoe.Type("/items/iron_hoe.png", "Iron Hoe", 1);
+        COPPER_HOE = new Hoe.Type("/items/copper_hoe.png", "Copper Hoe", 1.25f);
+        TITANIUM_HOE = new Hoe.Type("/items/titanium_hoe.png", "Titanium Hoe", 1.5f);
+        OLD_HOE = new Hoe.Type("/items/old_hoe.png", "Old Hoe", 0.75f);
     }
     
     private static ItemType.Mass create(String path, String name) {

@@ -35,24 +35,12 @@ public class InventoryCell extends DataCell{
     public Inventory getInventory() {
         return inv;
     }
-
-    @Override
-    public Object toObject() {
-        return inv;
-    }
-
+    
     @Override
     public InventoryCell clone() {
         InventoryCell cell = new InventoryCell(tile);
         cell.inv = inv.clone();
         return cell;
-    }
-
-    @Override
-    public void parseObject(Object container) {
-        inv = (Inventory) container;
-        CodingGame codingGame = (CodingGame) LWJGL.currentLoop;
-        inv.refresh(codingGame.gs);
     }
 
     @Override

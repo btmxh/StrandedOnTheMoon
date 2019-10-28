@@ -29,7 +29,6 @@ void main(){
             out_color.a = 1;   
         }
     }
-    if(out_color.a < 0.3)   discard;
     
     if(breakStage >= 0) {
         int row = breakStage / breakMapHeight;

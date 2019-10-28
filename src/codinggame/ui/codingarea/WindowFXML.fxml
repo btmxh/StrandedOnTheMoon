@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane id="AnchorPane" prefHeight="422.0" prefWidth="443.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="codinggame.ui.codingarea.WindowController">
+   <children>
+      <TextArea fx:id="outputTextArea" editable="false" layoutX="42.0" layoutY="301.0" prefHeight="107.0" prefWidth="398.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="42.0" AnchorPane.rightAnchor="3.0" />
+      <Label layoutX="42.0" layoutY="279.0" text="Output" AnchorPane.bottomAnchor="126.0" AnchorPane.leftAnchor="42.0" />
+      <JFXButton fx:id="run" ellipsisString="Run your program" layoutX="4.0" layoutY="301.0" AnchorPane.bottomAnchor="96.0" AnchorPane.leftAnchor="4.0" />
+      <JFXButton fx:id="compile" layoutX="4.0" layoutY="331.0" AnchorPane.bottomAnchor="66.0" AnchorPane.leftAnchor="4.0" />
+      <JFXButton fx:id="runAndCompile" layoutX="4.0" layoutY="361.0" AnchorPane.bottomAnchor="36.0" AnchorPane.leftAnchor="4.0" />
+      <TabPane fx:id="codeAreaPane" prefHeight="278.0" prefWidth="443.0" tabClosingPolicy="ALL_TABS" AnchorPane.bottomAnchor="144.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+   </children>
+</AnchorPane>

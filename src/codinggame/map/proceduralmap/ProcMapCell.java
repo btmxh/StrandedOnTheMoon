@@ -63,5 +63,4 @@ public class ProcMapCell implements MapCell, Serializable{
     }
     
     
-    
 }

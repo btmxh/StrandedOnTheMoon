@@ -5,6 +5,7 @@
  */
 package codinggame.objs.modules;
 
+import codinggame.objs.items.ItemType;
 import codinggame.objs.robots.Robot;
 import codinggame.states.GameState;
 import com.lwjglwrapper.LWJGL;
@@ -25,32 +26,14 @@ import javafx.util.Pair;
  *
  * @author Welcome
  */
-public abstract class Module implements Serializable{
-    
-    private static Map<String, Pair<Texture2D, NVGImage>> textures = new HashMap<>();
+public abstract class Module extends ItemType.Count implements Serializable{
     
     protected transient GameState game;
-    protected transient Texture2D texture;
-    protected transient NVGImage nanoVGTexture;
-    private String name;
     private Class<? extends Robot>[] robotClasses;
 
     public Module(GameState game, String name, String path, Class<? extends Robot>... robotClasses) {
+        super(path, name, 0);
         this.game = game;
-        this.name = name;
-        Pair<Texture2D, NVGImage> pair = textures.get(path);
-        if(pair == null) {
-            this.texture = new Texture2D(TextureData.fromResource(Module.class, path));
-            try {
-                this.nanoVGTexture = LWJGL.graphics.createNanoVGImageFromResource(Utils.ioResourceToByteBuffer(Module.class.getResourceAsStream(path), 8 * 1024), 0);
-            } catch (IOException ex) {
-                Logger.getLogger(Module.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            textures.put(path, new Pair<>(texture, nanoVGTexture));
-        } else {
-            this.texture = pair.getKey();
-            this.nanoVGTexture = pair.getValue();
-        }
         this.robotClasses = robotClasses;
     }
     
@@ -66,23 +49,11 @@ public abstract class Module implements Serializable{
     protected final boolean canBeInstalled(Robot robot) {
         return Stream.of(robotClasses).anyMatch((c) -> robot.instanceOf(c));
     }
-
-    public String getName() {
-        return name;
-    }
     
     public void setGameState(GameState game) {
         this.game = game;
     }
-
-    public Texture2D getTexture() {
-        return texture;
-    }
     
     @Override
     public abstract Module clone();
-
-    public NVGImage getNanoVGTexture() {
-        return nanoVGTexture;
-    }
 }

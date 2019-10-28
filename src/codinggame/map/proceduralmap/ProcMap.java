@@ -56,8 +56,8 @@ public class ProcMap extends GameMap{
         return generator;
     }
     
-    public void update() {
-        getMapLayers().stream().map((l) -> (ProcMapLayer) l).forEach(ProcMapLayer::update);
+    public void update(int cameraChunkX, int cameraChunkY) {
+        getMapLayers().stream().map((l) -> (ProcMapLayer) l).forEach((layer) -> layer.update(cameraChunkX, cameraChunkY));
     }
     
     public void save(Clock clock) throws IOException {
@@ -66,11 +66,6 @@ public class ProcMap extends GameMap{
         writer.newLine();
         writer.write(String.valueOf(clock.getGameTime()));
         writer.close();
-    }
-
-    @Override
-    public void chooseTile(MapLayer layer, int x, int y) {
-        super.chooseTile(layer, x, y);
     }
     
     

@@ -16,11 +16,12 @@ import codinggame.states.GameState;
 public class MiningSpeedModule extends Module{
     
     private static final float DEFAULT_SCALE = 1.2f;
+    private static final String TEXTURE_PATH = "/items/mine_speed_module.png";
     
     private float scale = DEFAULT_SCALE;
     
     public MiningSpeedModule(GameState game) {
-        super(game, "Mining Speed Module", "/items/mine_speed_module.png", MinerRobot.class);
+        super(game, "Mining Speed Module", TEXTURE_PATH, MinerRobot.class);
     }
 
     public float getScale() {

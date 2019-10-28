@@ -7,6 +7,8 @@ package codinggame.lang;
 
 import codinggame.objs.robots.Robot;
 import codinggame.states.GameState;
+import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -16,6 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javafx.util.Pair;
 import net.openhft.compiler.CompilerUtils;
 
 /**
@@ -30,38 +33,44 @@ public class JavaParser {
         this.game = game;
     }
     
-    public Runnable parse(String block, Robot robot) {
+    public Runnable getMainMethod(Pair<Robot, Class> pair) throws NoSuchMethodException {
+        Robot robot = pair.getKey();
+        Class clazz = pair.getValue();
+        Method _main = null;
         try {
+            _main = clazz.getMethod("main");
+            _main.setAccessible(true);
+        } catch (SecurityException ex) {
+            Logger.getLogger(JavaParser.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        final Method main = _main;
+        return () -> {
+            try {
+                Object inst = clazz.getConstructor(GameState.class, Robot.class).newInstance(game, game.getRobotHandler().getCurrentRobot());
+                robot.beginMoving();
+                main.invoke(inst);
+                robot.endMoving();
+            } catch (Exception ex) {
+                Logger.getLogger(JavaParser.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        };
+    }
+    
+    public Class loadClass(String block, PrintWriter loggerWriter) {
+        try {
+            Robot robot = game.getRobotHandler().getCurrentRobot();
             String className = robot.getName();
             block = formatCode(block, className);
-            System.out.println(block);
-            Class clazz = CompilerUtils.CACHED_COMPILER.loadFromJava(
+            return CompilerUtils.CACHED_COMPILER.loadFromJava(
                     new URLClassLoader(new URL[0]), "codinggame.lang." + className, block,
-                    game.getUIHandler().loggerWriter());
-            return () -> {
-                try {
-                    Method main = clazz.getMethod("main");
-                    if(main != null) {
-                        main.setAccessible(true);
-                        Object inst = clazz.getConstructor(GameState.class, Robot.class).newInstance(game, game.getRobotHandler().getCurrentRobot());
-                        robot.beginMoving();
-                        main.invoke(inst);
-                        robot.endMoving();
-                    }
-                } catch (Exception ex) {
-                    Logger.getLogger(JavaParser.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            };
+                    loggerWriter);
         } catch (ClassNotFoundException ex) {
-            System.out.println("Class loaded unsuccessfully");
+            Logger.getLogger(JavaParser.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        return ()->{};
+        return null;
     }
     
     public String formatCode(String code, String className) {
-        System.out.println(code);
-        System.out.println("____________________");
         String importRegex = "import.+?(?=;);+";
         Pattern pattern = Pattern.compile(importRegex);
         Matcher matcher = pattern.matcher(code);
@@ -87,11 +96,16 @@ public class JavaParser {
         String packageDeclaration = "package codinggame.lang;";
         code = packageDeclaration + "\n\n" + code;
         
-        System.out.println(code);
         return code;
     }
     
     public static void main(String[] args) {
         new JavaParser(null).formatCode("import printlnutils.println.*;;;;import runnable;public void run() {println(123);}", "Main");
     }
+
+    public void setGameState(GameState game) {
+        this.game = game;
+    }
+    
+    
 }

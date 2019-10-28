@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -33,6 +36,7 @@ public class ChunkThread implements Runnable{
         startThread();
         synchronized (lock) {
             chunksToLoad.add(location);
+            lock.notifyAll();
         }
     }
     
@@ -40,6 +44,7 @@ public class ChunkThread implements Runnable{
         startThread();
         synchronized (lock) {
             chunksToSave.put(location, chunk);
+            lock.notifyAll();
         }
     }
     
@@ -53,6 +58,9 @@ public class ChunkThread implements Runnable{
     
     public static void stopThread() {
         running = false;
+        synchronized (lock) {
+            lock.notifyAll();
+        }
     }
     
     static void removeLoadChunk(ChunkLocation location) {
@@ -69,19 +77,37 @@ public class ChunkThread implements Runnable{
 
     @Override
     public void run() {
+        ChunkLocation load = null, save = null;
+        ProcMapChunk saveChunk = null;
         while (running) {
-            System.out.print("");
+            
             synchronized (lock) {
-                if(!chunksToLoad.isEmpty()) {
-                    chunksToLoad.forEach(ChunkLocation::load);
+                Optional<ChunkLocation> loadOptional = chunksToLoad.stream().findAny();
+                load = loadOptional.isPresent()? loadOptional.get():null;
+                Optional<Map.Entry<ChunkLocation, ProcMapChunk>> saveOptional = chunksToSave.entrySet().stream().findAny();
+                Map.Entry<ChunkLocation, ProcMapChunk> entry = saveOptional.isPresent()? saveOptional.get():null;
+                if(entry != null) {
+                    save = entry.getKey();
+                    saveChunk = entry.getValue();
                 }
-                chunksToLoad.removeAll(remove);
-                if(!chunksToSave.isEmpty()) {
-                    for (ChunkLocation location : chunksToSave.keySet()) {
-                        location.save(chunksToSave.get(location));
-                    }
+                if(load == null && save == null)    try {
+                    lock.wait();
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(ChunkThread.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                chunksToSave.keySet().removeAll(savedChunks);
+            }
+            if(load != null) {
+                load.load();
+                chunksToLoad.remove(load);
+            }
+            if(save != null) {
+                save.save(saveChunk);
+                chunksToSave.remove(save);
+            }
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ChunkThread.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }

@@ -11,22 +11,24 @@ import codinggame.objs.items.ItemType;
 import codinggame.objs.items.ItemTypes;
 import codinggame.objs.items.MassItem;
 import codinggame.states.GameState;
+import codinggame.utils.ArrayMap;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javafx.util.Pair;
 
 /**
  *
  * @author Welcome
  */
 public class Inventory implements Serializable{
-    protected Map<ItemType, Item> items;
+    protected ArrayMap<ItemType, Item> items;
     protected double maxCapacity;
     protected double currentMass;
 
     public Inventory(double maxMassCapacity) {
-        this.items = new HashMap<>();
+        this.items = new ArrayMap<>();
         this.maxCapacity = maxMassCapacity;
         this.currentMass = 0;
     }
@@ -38,7 +40,7 @@ public class Inventory implements Serializable{
     }
     
     private boolean add(MassItem item) {
-        ItemType.Mass type = item.getItemType();
+        ItemType type = item.getItemType();
         MassItem existedItem = (MassItem) items.get(type);
         if(existedItem == null) {
             existedItem = item.clone();
@@ -59,7 +61,7 @@ public class Inventory implements Serializable{
     }
     
     private boolean add(CountItem item) {
-        ItemType.Count type = item.getItemType();
+        ItemType.Count type = (ItemType.Count) item.getItemType();
         CountItem existedItem = (CountItem) items.get(type);
         if(existedItem == null) {
             existedItem = item.clone();
@@ -122,7 +124,7 @@ public class Inventory implements Serializable{
         System.out.println(items);
     }
     
-    public Map<ItemType, Item> getItems() {
+    public ArrayMap<ItemType, Item> getItems() {
         return items;
     }
     
@@ -169,10 +171,10 @@ public class Inventory implements Serializable{
     public void refresh(GameState game) {
         //When the inventory is saved, the item is also saved, but it is different from the one that the game will load next time
         //So this method will replace all of the old items by the new ones
-        Map<ItemType, Item> newMap = new HashMap<>();
-        for (ItemType type : items.keySet()) {
-            ItemType newType = ItemTypes.getItemByName(type.getName());
-            newMap.put(newType, items.get(type).itemType(newType));
+        ArrayMap<ItemType, Item> newMap = new ArrayMap<>();
+        for (Pair<ItemType, Item> entry : items) {
+            ItemType newType = ItemTypes.getItemByName(entry.getKey().getName());
+            newMap.put(newType, entry.getValue().itemType(newType));
         }
         items.clear();
         items = newMap;
@@ -182,7 +184,7 @@ public class Inventory implements Serializable{
     public Inventory clone() {
         Inventory clone = new Inventory(maxCapacity);
         clone.currentMass = currentMass;
-        for (Map.Entry<ItemType, Item> entry : items.entrySet()) {
+        for (Pair<ItemType, Item> entry : items) {
             ItemType key = entry.getKey();
             Item value = entry.getValue();
             clone.items.put(key, value.clone());

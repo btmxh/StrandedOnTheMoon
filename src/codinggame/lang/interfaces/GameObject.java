@@ -5,11 +5,13 @@
  */
 package codinggame.lang.interfaces;
 
+import codinggame.CodingGame;
 import codinggame.handlers.CommandHandler;
 import codinggame.lang.CommandBlock;
 import codinggame.lang.commands.WaitCommand;
 import codinggame.objs.robots.Robot;
 import codinggame.states.GameState;
+import codinggame.ui.codingarea.CodingFX;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,12 +33,11 @@ public class GameObject {
     }
     
     public void println(Object obj) {
-        game.getUIHandler().println(obj == null? "null":obj.toString());
-        testInterupt();
+        print((obj == null? "null":obj.toString()) + "\n");
     }
     
     public void print(Object obj) {
-        game.getUIHandler().print(obj == null? "null":obj.toString());
+        CodingFX.currentController.print(obj == null? "null":obj.toString());
         testInterupt();
     }
     

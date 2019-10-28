@@ -19,9 +19,9 @@ import java.util.logging.Logger;
  */
 public abstract class ChunkLocation {
     
-    private ProcMapLayer layer;
-    private int chunkX, chunkY;
-    private boolean done = false;
+    protected ProcMapLayer layer;
+    protected int chunkX, chunkY;
+    protected boolean done = false;
 
     public ChunkLocation(ProcMapLayer layer, int chunkX, int chunkY) {
         this.layer = layer;

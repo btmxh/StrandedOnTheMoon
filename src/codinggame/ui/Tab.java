@@ -5,6 +5,7 @@
  */
 package codinggame.ui;
 
+import codinggame.handlers.GameUIHandler;
 import com.lwjglwrapper.nanovg.NVGGraphics;
 import com.lwjglwrapper.utils.IColor;
 import com.lwjglwrapper.utils.geom.PaintedShape;
@@ -51,7 +52,7 @@ public abstract class Tab extends Panel {
                     Rectanglef rect = buttonBounds.getJOMLRect();
                     final float WIDTH = rect.maxX - rect.minX, HEIGHT = rect.maxY - rect.minY;
                     final float TRIANGLE_SIZE = 10, TEXT_SIZE = HEIGHT / 1.5f;
-                    g.setUpText(CodingArea.textFont, IColor.WHITE, TEXT_SIZE, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
+                    g.setUpText(GameUIHandler.textFont, IColor.WHITE, TEXT_SIZE, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
                     g.text(this.text, 10, HEIGHT / 2);
                     float[] ys;
                     if (open) {

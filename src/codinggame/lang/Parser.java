@@ -9,6 +9,7 @@ import codinggame.CodingGame;
 import codinggame.handlers.GameUIHandler;
 import codinggame.objs.robots.Robot;
 import codinggame.states.GameState;
+import codinggame.ui.codingarea.CodingFX;
 import org.joml.Vector2f;
 
 
@@ -86,8 +87,7 @@ public class Parser {
     }
     
     public void throwParsingError(String description) {
-        GameUIHandler uiHandler = CodingGame.getInstance().gs.getUIHandler();
-        uiHandler.println("Error parsing line number " + (processingLineIndex + 1) + ": " + description);
+        CodingFX.currentController.println("Error parsing line number " + (processingLineIndex + 1) + ": " + description);
         processingFailed = true;
     }
 

@@ -39,8 +39,10 @@ public class MineCommand extends Command{
     public MineCommand(GameState game, CommandBlock parentCommandBlock, Robot executingRobot, CommandHandler executor, Direction direction) {
         super(game, parentCommandBlock, executingRobot, executor);
         this.direction = direction;
-        float miningSpeed = ((MinerRobot) executingRobot).getDrill().getItemType().getMiningSpeed();
-        super.setMaxTime(2f / miningSpeed);
+        if(executingRobot instanceof MinerRobot) {
+            float miningSpeed = ((MinerRobot) executingRobot).getDrill().getItemType().getMiningSpeed();
+            super.setMaxTime(2f / miningSpeed);
+        }
     }
 
     @Override
@@ -79,13 +81,7 @@ public class MineCommand extends Command{
         super.begin();
         if(!(executingRobot instanceof MinerRobot)) {
             executor.throwExecutionError(this, "This robot is not a miner robot");
-            return;
         }
-        MinerRobot miner = (MinerRobot) executingRobot;
-        MapHandler mapHandler = game.getMapHandler();
-        int x = direction.getX(executingRobot.getTileX());
-        int y = direction.getY(executingRobot.getTileY());
-        Item drill = miner.getInventory().getEquipment(EquipmentSlot.DRILL);
     }
     
     

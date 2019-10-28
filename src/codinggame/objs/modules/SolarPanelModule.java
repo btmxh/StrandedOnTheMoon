@@ -15,11 +15,13 @@ import codinggame.states.GameState;
  */
 public class SolarPanelModule extends Module{
     
+    private static final String TEXTURE_PATH = "/items/solar_module.png";
+    
     private double chance;
     private int amount;
 
     public SolarPanelModule(GameState game, double chance, int amount) {
-        super(game, "Solar Panel Module", "/items/solar_module.png", Robot.class);
+        super(game, "Solar Panel Module", TEXTURE_PATH, Robot.class);
         this.chance = chance;
         this.amount = amount;
     }

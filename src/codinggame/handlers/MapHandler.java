@@ -5,21 +5,24 @@
  */
 package codinggame.handlers;
 
+import codinggame.CodingGame;
 import codinggame.globjs.Camera;
 import codinggame.map.GameMap;
 import codinggame.map.MapCell;
 import codinggame.map.MapLayer;
 import codinggame.map.MapTile;
 import codinggame.map.proceduralmap.ProcMap;
+import codinggame.map.proceduralmap.ProcMapChunk;
 import codinggame.map.proceduralmap.ProcMapLoader;
 import codinggame.map.renderer.MapRenderer;
-import codinggame.map.tiledmap.TiledMapLoader;
 import codinggame.objs.Clock;
+import codinggame.objs.buildings.Building;
 import codinggame.objs.items.Item;
 import codinggame.objs.items.ItemTypes;
 import codinggame.objs.items.MassItem;
 import codinggame.objs.items.equipments.Drill;
 import codinggame.states.GameState;
+import com.lwjglwrapper.LWJGL;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -40,8 +43,8 @@ public class MapHandler {
     public MapHandler(GameState game, Clock clock) {
         this.game = game;
         try {
-            map = TiledMapLoader.loadMap("", "new_moon.tmx");
-//            map = ProcMapLoader.loadMap("saves/procmap", "", clock);
+//            map = TiledMapLoader.loadMap("", "new_moon.tmx");
+            map = ProcMapLoader.loadMap("saves/procmap", "", clock);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -56,12 +59,18 @@ public class MapHandler {
         renderer.setTileSize(game.getMapViewport(), game.getCamera().getTileSize(), game.getCamera().getTileSize());
         
         if(map instanceof ProcMap) {
-            ((ProcMap) map).update();
+            Vector2f centerTile = camera.getPixelTranslation().negate().add(LWJGL.window.getWidth() / 2, 0).mul(1/camera.getTileSize());
+            int chunkX = (int) Math.floor(centerTile.x / ProcMapChunk.CHUNK_SIZE);
+            int chunkY = (int) -Math.floor(centerTile.y / ProcMapChunk.CHUNK_SIZE);
+
+            chunkX = 0;
+            chunkY = 0;
+            ((ProcMap) map).update(chunkX, chunkY);
         }
     }
     
     public void render(boolean notHoveringOnRobots) {
-        renderer.render(map, game.getCamera(), notHoveringOnRobots);
+        renderer.render(this, map, game.getCamera(), notHoveringOnRobots);
     }
     
     public void save(Clock clock) {
@@ -102,6 +111,44 @@ public class MapHandler {
 
     private static double rand(double min, double max) {
         return Math.random() * (max - min) + min;
+    }
+
+    public void renderBuilding(Building building, Camera camera) {
+        renderer.renderBuilding(this, building, camera);
+    }
+    //Choosing
+    public static class ChooseTile {
+        public final int x, y;
+        public final Object layerOrBuilding;
+
+        public ChooseTile(int x, int y, Object layerOrBuilding) {
+            this.x = x;
+            this.y = y;
+            this.layerOrBuilding = layerOrBuilding;
+        }
+        
+        public MapCell getCell() {
+            if (layerOrBuilding instanceof MapLayer) {
+                MapLayer layer = (MapLayer) layerOrBuilding;
+                return layer.getTileAt(x, y);
+            } else if(layerOrBuilding instanceof Building) {
+                Building building = (Building) layerOrBuilding;
+                return building.getTileAt(x, y);
+            } else throw new RuntimeException();
+        }
+        
+    }
+    public ChooseTile chooseTile;
+    
+    public void chooseTile(Object layerOrBuilding, int x, int y) {
+        chooseTile = new ChooseTile(x, y, layerOrBuilding);
+        CodingGame.getInstance().gs.select(chooseTile);
+    }
+    
+    public boolean tileChoosen(Object layerOrBuilding, int x, int y) {
+        if(CodingGame.getInstance().gs.getSelectedObject() instanceof ChooseTile) 
+            return chooseTile == null? false:chooseTile.x == x && chooseTile.y == y && chooseTile.layerOrBuilding == layerOrBuilding;
+        else return false;
     }
     
 }

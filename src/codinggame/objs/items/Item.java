@@ -11,22 +11,22 @@ import java.io.Serializable;
  *
  * @author Welcome
  */
-public abstract class Item implements Serializable{
-    protected ItemType type;
+public abstract class Item<T extends ItemType> implements Serializable{
+    protected T type;
 
-    public Item(ItemType type) {
+    public Item(T type) {
         this.type = type;
     }
     
-    public ItemType getItemType() {
+    public T getItemType() {
         return type;
     }
     
     public abstract double getMass();
-    public abstract Item multiply(double times);
+    public abstract Item<T> multiply(double times);
     
     @Override
-    public abstract Item clone();
+    public abstract Item<T> clone();
 
     public Item itemType(ItemType type) {
         Item item = this.clone();

@@ -16,7 +16,7 @@ import java.io.Serializable;
  * @author Welcome
  */
 public class MapTile implements Serializable{
-    public static final int MOON_TURF = 2, COPPER_ORE = 1, CHARGER = 3, BARRIER = 4, STORAGE_CELL = 5, MOON_ROCK = 6;
+    public static final int MOON_TURF = 2, COPPER_ORE = 1, CHARGER = 3, BARRIER = 4, STORAGE_CELL = 5, MOON_ROCK = 6, CENTRAL_STORAGE_UNIT = 7, CHEMICAL_PROCESSOR = 8, CONVEYOR = 9, GLASS = 10, SOIL = 11, WHEAT_CROPS = 12;
     
     private int id;
     private transient Texture2D texture;
@@ -33,10 +33,20 @@ public class MapTile implements Serializable{
     public Texture2D getTexture() {
         return texture;
     }
-    
-    public static void main(String[] args) throws IOException {
-        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("saves/test.txt"));
-        oos.writeObject(new MapTile(69, null));
-        oos.close();
+
+    public String getName() {
+        switch (id) {
+            case BARRIER: return "Barrier";
+            case CENTRAL_STORAGE_UNIT: return "Central Storage Unit";
+            case CHARGER: return "Charger";
+            case CHEMICAL_PROCESSOR: return "Chemical Processor";
+            case CONVEYOR: return "Conveyor";
+            case COPPER_ORE: return "Copper Ore";
+            case MOON_ROCK: return "Moon Rock";
+            case MOON_TURF: return "Moon Turf";
+            case STORAGE_CELL: return "Storage Cell";
+            case GLASS: return "Glass";
+            default: return "";
+        }
     }
 }

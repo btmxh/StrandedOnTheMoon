@@ -6,6 +6,7 @@
 package codinggame.objs.robots;
 
 import codinggame.globjs.Camera;
+import codinggame.handlers.GameUIHandler;
 import codinggame.map.GameMap;
 import codinggame.map.MapCell;
 import codinggame.map.MapTile;
@@ -16,7 +17,6 @@ import codinggame.objs.modules.SolarPanelModule;
 import codinggame.objs.modules.SpeedModule;
 import codinggame.states.GameState;
 import codinggame.states.InputProcessor;
-import codinggame.ui.CodingArea;
 import com.lwjglwrapper.LWJGL;
 import com.lwjglwrapper.display.Viewport;
 import com.lwjglwrapper.nanovg.NVGGraphics;
@@ -48,6 +48,7 @@ public class Robot implements Serializable{
     protected transient IColor color = IColor.LIME;
     protected transient boolean hovering;
     protected transient boolean stop = false;
+    protected String code;
     
     private transient Object lock = new Object();
     
@@ -98,7 +99,7 @@ public class Robot implements Serializable{
             g.translate(MathUtils.clamp(0, x, game.getMapViewport().getWidth() - w), MathUtils.clamp(0, y, game.getMapViewport().getHeight() - h));
             g.rect(0, 0, w, h);
             g.fill(IColor.LIGHTGRAY);
-            g.setUpText(CodingArea.textFont, IColor.WHITE, 20, NanoVG.NVG_ALIGN_LEFT | NanoVG.NVG_ALIGN_TOP);
+            g.setUpText(GameUIHandler.textFont, IColor.WHITE, 20, NanoVG.NVG_ALIGN_LEFT | NanoVG.NVG_ALIGN_TOP);
             g.beginPath();
             g.translate(10, 10);
             g.text(getTypeName(), 0, 0);
@@ -222,6 +223,14 @@ public class Robot implements Serializable{
                 .map(SpeedModule.class::cast)
                 .mapToDouble(SpeedModule::getScale)
                 .reduce(1, (a, b) -> a*b);
+    }
+
+    public void setSourceCode(String code) {
+        this.code = code;
+    }
+
+    public String getSourceCode() {
+        return code;
     }
     
     

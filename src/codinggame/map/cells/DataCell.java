@@ -12,13 +12,10 @@ import codinggame.map.proceduralmap.ProcMapCell;
  *
  * @author Welcome
  */
-public abstract class DataCell extends ProcMapCell{
+public class DataCell extends ProcMapCell{
     
     public DataCell(MapTile tile) {
         super(tile);
     }
-    
-    public abstract Object toObject();
-    public abstract void parseObject(Object container);
     
 }

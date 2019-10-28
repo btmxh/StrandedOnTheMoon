@@ -41,31 +41,5 @@ public class GameMap {
     public MapLayers getMapLayers() {
         return mapLayers;
     }
-
-    //Choosing
-    public static class ChooseTile {
-        public final int x, y;
-        public final MapLayer layer;
-
-        public ChooseTile(int x, int y, MapLayer layer) {
-            this.x = x;
-            this.y = y;
-            this.layer = layer;
-        }
-        
-    }
-    
-    public ChooseTile chooseTile;
-    
-    public void chooseTile(MapLayer layer, int x, int y) {
-        chooseTile = new ChooseTile(x, y, layer);
-        CodingGame.getInstance().gs.select(chooseTile);
-    }
-    
-    public boolean tileChoosen(MapLayer layer, int x, int y) {
-        if(CodingGame.getInstance().gs.getSelectedObject() instanceof ChooseTile) 
-            return chooseTile == null? false:chooseTile.x == x && chooseTile.y == y && chooseTile.layer == layer;
-        else return false;
-    }
     
 }

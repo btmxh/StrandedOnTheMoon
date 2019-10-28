@@ -26,7 +26,7 @@ import javax.imageio.ImageIO;
  * @author Welcome
  */
 public class ProcMapChunk {
-    public static final int CHUNK_SIZE = 128;
+    public static final int CHUNK_SIZE = 16;
     
     private ProcMapCell[][] map;
     private Map<Point, DataCell> dataCells;

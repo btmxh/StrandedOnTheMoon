@@ -5,11 +5,12 @@
  */
 package codinggame.handlers;
 
-import codinggame.CodingGame;
+import codinggame.handlers.MapHandler.ChooseTile;
 import codinggame.lang.JavaParser;
 import codinggame.lang.Parser;
-import codinggame.map.GameMap.ChooseTile;
 import codinggame.map.MapCell;
+import codinggame.map.cells.FacingCell;
+import codinggame.map.cells.FacingCell.Facing;
 import codinggame.map.cells.InventoryCell;
 import codinggame.objs.Battery;
 import codinggame.objs.Inventory;
@@ -20,12 +21,14 @@ import codinggame.objs.modules.Module;
 import codinggame.objs.robots.Robot;
 import codinggame.states.GameState;
 import codinggame.states.InputProcessor;
-import codinggame.ui.CodingArea;
 import codinggame.ui.IButton;
+import codinggame.ui.IComboBox;
 import codinggame.ui.Tab;
 import codinggame.ui.TabbedPanel;
+import codinggame.ui.codingarea.CodingFX;
 import com.lwjglwrapper.LWJGL;
 import com.lwjglwrapper.display.Window;
+import com.lwjglwrapper.nanovg.NVGFont;
 import com.lwjglwrapper.nanovg.NVGGraphics;
 import com.lwjglwrapper.nanovg.NVGImage;
 import com.lwjglwrapper.nanovg.paint.Paint;
@@ -42,15 +45,14 @@ import com.lwjglwrapper.utils.ui.Button;
 import com.lwjglwrapper.utils.ui.Component;
 import com.lwjglwrapper.utils.ui.Panel;
 import com.lwjglwrapper.utils.ui.Stage;
-import com.lwjglwrapper.utils.ui.TextField;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.util.Pair;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.nanovg.NanoVG;
 
@@ -62,26 +64,24 @@ public class GameUIHandler {
     private Stage stage;
     
     private NVGImage closeIcon;
+    public static NVGFont textFont;
     
-    private final CodingArea codingArea, loggerArea;
-    private final IButton playButton;
     private final IButton openCodeButton;
     private final Button closeButton;
     private final TabbedPanel infoBar;
     private final Tab tileInventory;
     
-    private Parser parser;
-    private JavaParser javaParser;
     private GameState game;
     
-    private PrintWriter loggerWriter;
+    private IComboBox facingBox;
 
     public GameUIHandler(Window window, GameState game) {
         initStaticVariables();
-        parser = new Parser(game);
-        javaParser = new JavaParser(game);
+        textFont = LWJGL.graphics.createFont("res/ProggyClean.ttf", "ProggyClean");
         stage = window.getStage();
         this.game = game;
+        
+        CodingFX.initApp();
         
         try {
             closeIcon = LWJGL.graphics.createNanoVGImageFromResource(Utils.ioResourceToByteBuffer(GameUIHandler.class.getResourceAsStream("/close1.png"), 8 * 1024), NanoVG.NVG_IMAGE_GENERATE_MIPMAPS);
@@ -102,7 +102,7 @@ public class GameUIHandler {
         robotPanelInfo.getShapeStates().setAll(Shape.EMPTY).setAllAfterPaints((g) -> {
             g.translate(INFO_BAR_X.get(), INFO_BAR_Y.get());
             Robot robot = (Robot) game.getSelectedObject();
-            g.setUpText(CodingArea.textFont, IColor.WHITE, 20, NanoVG.NVG_ALIGN_TOP | NanoVG.NVG_ALIGN_LEFT);
+            g.setUpText(textFont, IColor.WHITE, 20, NanoVG.NVG_ALIGN_TOP | NanoVG.NVG_ALIGN_LEFT);
             g.translate(0, 60);
             g.text(robot.getTypeName(), 10, 0);
             g.translate(0, 30);
@@ -128,17 +128,17 @@ public class GameUIHandler {
 
                     g.rect(0, 0, INFO_BAR_WIDTH.get(), 30);
                     g.fill(slot.getColor());
-                    g.setUpText(CodingArea.textFont, IColor.WHITE, 16, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
+                    g.setUpText(textFont, IColor.WHITE, 16, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
                     g.text(item.toString(), 10, 15);
                     g.image(item.getItemType().getNanoVGTexture(), INFO_BAR_WIDTH.get() - 30, 0, 30, 30);
                     g.translate(0, 32);
                 }
-                for (Map.Entry<ItemType, Item> entry : robot.getInventory().getItems().entrySet()) {
+                for (Pair<ItemType, Item> entry : robot.getInventory().getItems().entrySet()) {
                     Item item = entry.getValue();
 
                     g.rect(0, 0, INFO_BAR_WIDTH.get(), 30);
                     g.fill(new IColor(0.2f));
-                    g.setUpText(CodingArea.textFont, IColor.WHITE, 16, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
+                    g.setUpText(textFont, IColor.WHITE, 16, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
                     g.text(item.toString(), 10, 15);
                     g.image(item.getItemType().getNanoVGTexture(), INFO_BAR_WIDTH.get() - 30, 0, 30, 30);
                     g.translate(0, 32);
@@ -153,7 +153,7 @@ public class GameUIHandler {
                     if(module == null)  continue;
                     g.rect(0, 0, INFO_BAR_WIDTH.get(), 30);
                     g.fill(new IColor(0.2f));
-                    g.setUpText(CodingArea.textFont, IColor.WHITE, 16, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
+                    g.setUpText(textFont, IColor.WHITE, 16, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
                     g.text(module.getName(), 10, 15);
                     g.image(module.getNanoVGTexture(), INFO_BAR_WIDTH.get() - 30, 0, 30, 30);
                     g.translate(0, 32);
@@ -162,6 +162,7 @@ public class GameUIHandler {
         };
         
         Panel tileInfoBar = new Panel(stage, false);
+        facingBox = new IComboBox(stage, 40, new GLRect(()->90, ()->0, ()->100, ()->30), textFont);
         tileInfoBar.getShapeStates().reset()
                 .setAll(new Rect(GLFloats.ZERO, GLFloats.ZERO, INFO_BAR_WIDTH, INFO_BAR_HEIGHT))
                 .setAllStrokes(IColor.BLACK)
@@ -169,51 +170,52 @@ public class GameUIHandler {
                 .setAllBeforePaints((g) -> g.translate(INFO_BAR_X.get(), INFO_BAR_Y.get()))
                 .setAllAfterPaints((g) -> {
                     ChooseTile tile = (ChooseTile) game.getSelectedObject();
-                    MapCell cell = tile.layer.getTileAt(tile.x, tile.y);
+                    MapCell cell = tile.getCell();
+                    if(cell == null)    return;
                     g.translate(0, 60);
-                    g.setUpText(CodingArea.textFont, IColor.WHITE, 20, NanoVG.NVG_ALIGN_TOP | NanoVG.NVG_ALIGN_LEFT);
-                    g.text("Tile: " + cell.getTileType().getID(), 10, 0);
+                    g.setUpText(textFont, IColor.WHITE, 20, NanoVG.NVG_ALIGN_TOP | NanoVG.NVG_ALIGN_LEFT);
+                    g.text("Tile: " + cell.getTileType().getName(), 10, 0);
                     g.translate(0, 30);
                     g.text("Position: x=" + tile.x + " y=" + tile.y, 10, 0);
-                    g.translate(0, 30);
+                    g.translate(0, 25);
+                    if(cell instanceof FacingCell) {
+                        g.text("Facing: ", 10, 5);
+                        facingBox.setVisible(true);
+                    } else facingBox.setVisible(false);
+                    //g.translate(0, 30);
                 }).construct(false);
+        new IComboBox.IComboBoxCell(facingBox, "Left");
+        new IComboBox.IComboBoxCell(facingBox, "Up");
+        new IComboBox.IComboBoxCell(facingBox, "Right");
+        new IComboBox.IComboBoxCell(facingBox, "Down");
+        facingBox.setOnChangeListener((idx, cell)->{
+            Object selected = game.getSelectedObject();
+            if(selected instanceof ChooseTile) {
+                ChooseTile tile = (ChooseTile) selected;
+                ((FacingCell) tile.getCell()).setFacing(Facing.values()[idx]);
+            }
+        });
+        
+        tileInfoBar.addChild(facingBox);
         
         tileInventory = new Tab(stage, "Inventory", new Rect(GLFloats.ZERO, GLFloats.ZERO, INFO_BAR_WIDTH, GLFloat.memValue(30)), false) {
             @Override
             public void renderContent(NVGGraphics g) {
                 ChooseTile tile = (ChooseTile) game.getSelectedObject();
-                InventoryCell cell = (InventoryCell) tile.layer.getTileAt(tile.x, tile.y);
+                InventoryCell cell = (InventoryCell) tile.getCell();
                 Inventory inv = cell.getInventory();
-                for (Map.Entry<ItemType, Item> entry : inv.getItems().entrySet()) {
+                for (Pair<ItemType, Item> entry : inv.getItems().entrySet()) {
                     Item item = entry.getValue();
                     
                     g.rect(0, 0, INFO_BAR_WIDTH.get(), 30);
                     g.fill(new IColor(0.2f));
-                    g.setUpText(CodingArea.textFont, IColor.WHITE, 16, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
+                    g.setUpText(textFont, IColor.WHITE, 16, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
                     g.text(item.toString(), 10, 15);
+                    g.image(item.getItemType().getNanoVGTexture(), INFO_BAR_WIDTH.get() - 30, 0, 30, 30);
                     g.translate(0, 32);
                 }
             }
         };
-        
-        codingArea = new CodingArea(stage, new GLRect(
-                GLFloat.sub(GLFloats.w_fracOfWidth(GLFloat.memValue(0.73f)), INFO_BAR_WIDTH),
-                GLFloat.sub(GLFloats.w_fracOfHeight(GLFloat.memValue(0.35f)), GLFloat.memValue(10)),
-                GLFloats.w_fracOfWidth(GLFloat.memValue(0.27f)),
-                GLFloats.w_fracOfHeight(GLFloat.memValue(0.5f))
-        ));
-        codingArea.setVisible(false);
-        codingArea.appendText("public void main(){\n\t" + (CodingGame.arg == null? "Display.setSize(1440, 878);":CodingGame.arg)+"\n}");
-        codingArea.setLineNumbered(true);
-        loggerArea = new CodingArea(stage, new GLRect(
-                GLFloat.sub(GLFloats.w_fracOfWidth(GLFloat.memValue(0.73f)), INFO_BAR_WIDTH),
-                GLFloats.w_fracOfHeight(GLFloat.memValue(0.85f)),
-                GLFloats.w_fracOfWidth(GLFloat.memValue(0.27f)),
-                GLFloats.w_fracOfHeight(GLFloat.memValue(0.15f))
-        ));
-        loggerArea.setEditable(false);
-        loggerArea.setVisible(false);
-        println("Output:");
         openCodeButton = new IButton(stage, false, new GLRect(
                 GLFloat.memValue(10), GLFloats.w_fromFarXAxis(GLFloat.memValue(310)), GLFloat.memValue(200), GLFloat.memValue(40)
         ), new Paint[]{new IColor(0.5f), new IColor(0.6f), new IColor(0.2f)}, IColor.WHITE, IColor.WHITE);
@@ -223,34 +225,17 @@ public class GameUIHandler {
             private boolean opened = false;
             @Override
             public void action(Stage stage, Button comp, int mode) {
-                opened = !opened;
-                openCodeButton.setText(opened? "Close Code":"Open Code");
-                codingArea.setVisible(opened);
-                loggerArea.setVisible(opened);
-            }
-        });
-        playButton = new IButton(stage, false, new GLRect(
-                GLFloat.memValue(10), GLFloats.w_fromFarXAxis(GLFloat.memValue(260)), GLFloat.memValue(200), GLFloat.memValue(40)
-        ), new Paint[]{new IColor(0.5f), new IColor(0.6f), new IColor(0.2f)}, IColor.WHITE, IColor.WHITE);
-        playButton.setText("Execute");
-        playButton.setOnClickListener((Stage s, Button comp, int mode) -> {
-            if(game.getRobotHandler().getCurrentRobot().isRunning()) {
-                game.getCommandHandler().stop(game.getRobotHandler().getCurrentRobot());
-                playButton.setText("Execute");
-            } else {
-                String code = codingArea.getText();
-                Runnable main = javaParser.parse(code, game.getRobotHandler().getCurrentRobot());
-                Thread thread = new Thread(main);
-                game.getCommandHandler().addThread(game.getRobotHandler().getCurrentRobot(), thread);
-                playButton.setText("Stop");
+//                opened = !opened;
+//                openCodeButton.setText(opened? "Close Code":"Open Code");
+//                codingArea.setVisible(opened);
+//                loggerArea.setVisible(opened);
+                CodingFX.show();
             }
         });
         
-        robotInfoBar.addChild(codingArea);
-        robotInfoBar.addChild(loggerArea);
+        
         robotInfoBar.addChild(robotPanelInfo);
         robotInfoBar.addChild(openCodeButton);
-        robotInfoBar.addChild(playButton);
         robotInfoBar.addChild(robotInv);
         robotInfoBar.addChild(modules);
         
@@ -276,7 +261,6 @@ public class GameUIHandler {
     
     public void tick(InputProcessor processor) {
         stage.tick();
-        playButton.setText(game.getRobotHandler().getCurrentRobot().isRunning()? "Stop":"Execute");
     }
     
     public void render(NVGGraphics g) {
@@ -286,16 +270,19 @@ public class GameUIHandler {
         else if(selected instanceof ChooseTile) {
             infoBar.select(1);
             ChooseTile tile = (ChooseTile) selected;
-            tileInventory.setVisible(tile.layer.getTileAt(tile.x, tile.y) instanceof InventoryCell);
+            MapCell cell = tile.getCell();
+            tileInventory.setVisible(cell instanceof InventoryCell);
+            if(cell instanceof FacingCell) {
+                Facing facing = ((FacingCell) cell).getFacing();
+                facingBox.set(facing.ordinal());
+            }
         }
         closeButton.setVisible(infoBar.getSelectedIndex() >= 0);
-        g.begin();
 //        g.image(ItemTypes.COPPER_ORE.getNanoVGTexture(), 40, 40, 128, 128, IColor.RED);
-        g.setUpText(CodingArea.textFont, IColor.WHITE, 24, NanoVG.NVG_ALIGN_TOP | NanoVG.NVG_ALIGN_LEFT);
+        g.setUpText(textFont, IColor.WHITE, 24, NanoVG.NVG_ALIGN_TOP | NanoVG.NVG_ALIGN_LEFT);
         g.text(game.getClock().getDisplayTime(), 10, 10);
         g.text(game.getInputProcessor().toString(), 10, 40);
         stage.render();
-        g.end();
     }
     
     private static GLFloat INFO_BAR_WIDTH, INFO_BAR_HEIGHT, INFO_BAR_X, INFO_BAR_Y;
@@ -322,104 +309,16 @@ public class GameUIHandler {
     
     public boolean clickedOn() {
         if(infoBar.getSelectedIndex() == -1)    return false;
-        if(infoBar.getSelectedIndex() == 0) {
-            if(codingArea.isVisible() && codingArea.clickedOn())    return true;
-            else if(loggerArea.isVisible() && loggerArea.clickedOn())   return true;
-        }
         Rect infoBarBounds = new Rect(INFO_BAR_X, INFO_BAR_Y, INFO_BAR_WIDTH, INFO_BAR_HEIGHT);
         return infoBarBounds.contains(LWJGL.mouse.getCursorPosition());
     }
-
-    public void println(String string) {
-        print(string + "\n");
-    }
     
-    public void print(String string) {
-        loggerArea.getTextBuilder().append(string);
-        loggerArea.getTextOnChangeListener().textOnChange(string, TextField.TextOnChangeListener.ADD);
-    }
-    
-    public PrintWriter loggerWriter() {
-        if(loggerWriter == null) {
-            loggerWriter = new PrintWriter(new LoggerWriter());
-        }
-        return loggerWriter;
-    }
-
     public void closeInfoBar() {
         game.select(null);
         game.setProcessor(InputProcessor.GAME);
     }
     
-    private class LoggerWriter extends Writer{
-
-        private LoggerWriter() {
-            lock = new Object();
-        }
-
-        @Override
-        public void write(int c) throws IOException {
-            print((char) c + "");
-        }
-        
-        @Override
-        public void write(char[] cbuf, int off, int len) throws IOException {
-            if ((off < 0) || (off > cbuf.length) || (len < 0) ||
-                ((off + len) > cbuf.length) || ((off + len) < 0)) {
-                throw new IndexOutOfBoundsException();
-            } else if (len == 0) {
-                return;
-            }
-            String append = new String(cbuf, off, len);
-            print(append);
-        }
-
-        @Override
-        public void write(String append) throws IOException {
-            print(append);
-        }
-
-        @Override
-        public void write(String str, int off, int len) throws IOException {
-            print(str.substring(off, off + len));
-        }
-
-        @Override
-        public LoggerWriter append(CharSequence csq) throws IOException {
-            write(csq == null? "null":csq.toString());
-            return this;
-        }
-
-        @Override
-        public LoggerWriter append(char c) throws IOException {
-            write(c);
-            return this;
-        }
-
-        @Override
-        public LoggerWriter append(CharSequence csq, int start, int end) throws IOException {
-            CharSequence cs = (csq == null ? "null" : csq);
-            write(cs.subSequence(start, end).toString());
-            return this;
-        }
-
-        @Override
-        public String toString() {
-            return loggerArea.getText();
-        }
-
-        @Override
-        public void write(char[] cbuf) throws IOException {
-            super.write(cbuf);
-        }
-
-        @Override
-        public void flush() throws IOException {
-        }
-
-        @Override
-        public void close() throws IOException {
-        }
-        
+    public void dispose() {
+        closeIcon.dispose();
     }
 }

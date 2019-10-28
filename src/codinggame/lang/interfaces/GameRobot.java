@@ -5,13 +5,16 @@
  */
 package codinggame.lang.interfaces;
 
+import codinggame.CodingGame;
 import codinggame.handlers.CommandHandler;
 import codinggame.lang.CommandBlock;
 import codinggame.lang.commands.CraftCommand;
 import codinggame.lang.commands.EquipCommand;
 import codinggame.lang.commands.GiveCommand;
 import codinggame.lang.commands.GoCommand;
+import codinggame.lang.commands.HoeCommand;
 import codinggame.lang.commands.MineCommand;
+import codinggame.objs.RobotInventory;
 import codinggame.objs.crafting.Recipes;
 import codinggame.objs.items.CountItem;
 import codinggame.objs.items.Item;
@@ -58,6 +61,12 @@ public class GameRobot extends GameObject{
         super.testInterupt();
     }
     
+    public void hoe() {
+        executor.execute(new HoeCommand(game, currentBlock, robot, executor));
+        super.lock();
+        super.testInterupt();
+    }
+    
     public void give(Robot robot, String item, double amount) {
         ItemType itemType = ItemTypes.getItemByName(item);
         Item giveItem;
@@ -69,6 +78,10 @@ public class GameRobot extends GameObject{
         executor.execute(new GiveCommand(game, currentBlock, robot, executor, robot, giveItem));
         super.lock();
         super.testInterupt();
+    }
+    
+    public GameInventory<RobotInventory> getInventory() {
+        return new GameInventory<>(robot.getInventory());
     }
     
 }

@@ -45,16 +45,18 @@ public class ChunkIO {
             }
             dis.close();
             
-            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(chunkDataFile));
-            try {
-                Object obj = ois.readObject();
-                if(obj != null) {
-                    chunk.setDataCells((Map<Point, DataCell>) obj, new MapTilesets(new MapTileset[]{tileset}));
+            if(chunkDataFile.exists()) {
+                ObjectInputStream ois = new ObjectInputStream(new FileInputStream(chunkDataFile));
+                try {
+                    Object obj = ois.readObject();
+                    if(obj != null) {
+                        chunk.setDataCells((Map<Point, DataCell>) obj, new MapTilesets(new MapTileset[]{tileset}));
+                    }
+                } catch (Exception ex) {
+                    Logger.getLogger(ChunkIO.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            } catch (Exception ex) {
-                Logger.getLogger(ChunkIO.class.getName()).log(Level.SEVERE, null, ex);
+                ois.close();
             }
-            ois.close();
             return chunk;
         } else {
             return null;
@@ -62,6 +64,7 @@ public class ChunkIO {
     }
     
     public static void writeChunk(String path, ProcMapChunk chunk) throws IOException {
+        if(chunk == null)   return;
         File chunkFile = new File(path);
         File chunkDataFile = new File(path + "d");
         DataOutputStream dos = new DataOutputStream(new FileOutputStream(chunkFile));
@@ -76,6 +79,7 @@ public class ChunkIO {
         dos.flush();
         dos.close();
         
+        if(chunk.getDataCells().isEmpty())  return;
         ObjectOutputStream dataOutputStream = new ObjectOutputStream(new FileOutputStream(chunkDataFile));
         dataOutputStream.writeObject(chunk.getDataCells());
         dataOutputStream.close();

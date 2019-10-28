@@ -8,10 +8,14 @@ package codinggame.map.structures;
 import codinggame.map.MapCell;
 import codinggame.map.MapTile;
 import codinggame.map.MapTilesets;
+import codinggame.map.cells.ChemistryCell;
+import codinggame.map.cells.ColoredCell;
+import codinggame.map.cells.FacingCell;
 import codinggame.map.cells.InventoryCell;
 import codinggame.map.proceduralmap.ProcMapCell;
 import codinggame.objs.items.ItemTypes;
 import codinggame.objs.items.equipments.Drill;
+import com.lwjglwrapper.utils.IColor;
 import java.awt.Point;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +40,10 @@ public class CrashSpaceshipStructure extends Structure{
         InventoryCell storageCell = new InventoryCell(tileset.getTileByID(MapTile.STORAGE_CELL));
         storageCell.getInventory().add(new Drill(ItemTypes.TITANIUM_DRILL));
         tileMap.put(new Point(0, 1), storageCell);
+        tileMap.put(new Point(0, 2), new ChemistryCell(tileset.getTileByID(MapTile.CHEMICAL_PROCESSOR)));
+        tileMap.put(new Point(0, 3), new ColoredCell(IColor.LIME.alpha(0.15f), tileset.getTileByID(MapTile.GLASS)));
+        tileMap.put(new Point(0, 4), new FacingCell(tileset.getTileByID(MapTile.CONVEYOR)));
+        
         return tileMap;
     }
     

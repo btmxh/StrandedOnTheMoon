@@ -14,6 +14,7 @@ import codinggame.states.GameState;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
+import javafx.util.Pair;
 
 /**
  *
@@ -101,7 +102,7 @@ public class RobotInventory extends Inventory{
     public RobotInventory clone() {
         RobotInventory inv = new RobotInventory(maxCapacity);
         inv.currentMass = currentMass;
-        for (Map.Entry<ItemType, Item> entry : items.entrySet()) {
+        for (Pair<ItemType, Item> entry : items) {
             ItemType key = entry.getKey();
             Item value = entry.getValue();
             inv.items.put(key, value.clone());

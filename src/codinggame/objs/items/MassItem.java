@@ -10,18 +10,14 @@ import java.util.Locale;
 /**
  *
  * @author Welcome
+ * @param <T>
  */
-public class MassItem extends Item{
+public class MassItem<T extends ItemType.Mass> extends Item<T>{
     private double mass;
 
-    public MassItem(ItemType.Mass itemType, double mass) {
+    public MassItem(T itemType, double mass) {
         super(itemType);
         this.mass = mass;
-    }
-    
-    @Override
-    public ItemType.Mass getItemType() {
-        return (ItemType.Mass) super.getItemType();
     }
 
     @Override

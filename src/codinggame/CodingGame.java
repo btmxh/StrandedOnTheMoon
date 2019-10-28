@@ -6,10 +6,11 @@
 package codinggame;
 
 import codinggame.globjs.RenderableTexture;
+import codinggame.handlers.AudioHandler;
 import codinggame.objs.items.ItemTypes;
-import codinggame.ui.CodingArea;
 import codinggame.states.GameState;
 import codinggame.states.OptionState;
+import codinggame.ui.codingarea.CodingFX;
 import com.lwjglwrapper.LWJGL;
 import com.lwjglwrapper.display.Window;
 import com.lwjglwrapper.utils.states.GameStateLoop;
@@ -27,6 +28,7 @@ public class CodingGame extends GameStateLoop {
     private long frameID;
     public GameState gs;
     public OptionState os;
+    public AudioHandler audioHandler;
     
     private final List<Runnable> queries = new ArrayList<>();
     
@@ -36,18 +38,21 @@ public class CodingGame extends GameStateLoop {
     @Override
     protected void init() throws Exception {
         super.init();
-        CodingArea.initFont();
         RenderableTexture.init();
         LWJGL.currentLoop = this;
         
         gs = new GameState(this);
         os = new OptionState(this);
+        audioHandler = new AudioHandler();
         setState(gs);
     }
 
     @Override
     protected void dispose() {
+        super.dispose();
         ItemTypes.dispose();
+        audioHandler.dispose();
+        System.exit(46290);
     }
 
     @Override
@@ -117,7 +122,7 @@ public class CodingGame extends GameStateLoop {
     
     //For testing purposes
     public static void debug(Object obj) {
-        getInstance().gs.getUIHandler().println(obj == null?"null":obj.toString());
+        CodingFX.currentController.println(obj == null?"null":obj.toString());
     }
     
     public void execInMainThread(Runnable runnable) {

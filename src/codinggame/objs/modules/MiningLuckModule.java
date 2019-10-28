@@ -16,11 +16,12 @@ import java.io.IOException;
 public class MiningLuckModule extends Module{
     
     private static final float DEFAULT_SCALE = 1.2f;
+    private static final String TEXTURE_PATH = "/items/mine_luck_module.png";
     
     private float scale = DEFAULT_SCALE;
     
     public MiningLuckModule(GameState game) {
-        super(game, "Mining Luck Module", "/items/mine_luck_module.png", MinerRobot.class);
+        super(game, "Mining Luck Module", TEXTURE_PATH, MinerRobot.class);
     }
 
     public float getScale() {

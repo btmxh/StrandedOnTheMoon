@@ -14,12 +14,14 @@ import codinggame.states.GameState;
  */
 public class SpeedModule extends Module{
     
+    private static final String TEXTURE_PATH = "/items/speed_module.png";
+    
     private static final float DEFAULT_SCALE = 10.2f;
     
     private float scale = DEFAULT_SCALE;
     
     public SpeedModule(GameState game) {
-        super(game, "Speed Module", "/items/speed_module.png", Robot.class);
+        super(game, "Speed Module", TEXTURE_PATH, Robot.class);
     }
 
     public float getScale() {

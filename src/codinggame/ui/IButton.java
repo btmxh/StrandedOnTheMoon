@@ -5,6 +5,7 @@
  */
 package codinggame.ui;
 
+import codinggame.handlers.GameUIHandler;
 import com.lwjglwrapper.nanovg.paint.Paint;
 import com.lwjglwrapper.utils.geom.shapes.GLRect;
 import com.lwjglwrapper.utils.geom.shapes.Rect;
@@ -28,7 +29,7 @@ public class IButton extends Button {
                       .setFill(fills[HOVER], HOVER)
                       .setFill(fills[CLICKED], CLICKED)
                       .setAllAfterPaints((g) -> {
-                          CodingArea.textFont.use();
+                          GameUIHandler.textFont.use();
                           g.beginPath();
                           g.textAlign(NanoVG.NVG_ALIGN_CENTER | NanoVG.NVG_ALIGN_MIDDLE);
                           g.textSize(rect.getHeight().get() * 0.5f);

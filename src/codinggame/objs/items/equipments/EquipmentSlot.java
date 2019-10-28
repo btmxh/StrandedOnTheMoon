@@ -5,6 +5,7 @@
  */
 package codinggame.objs.items.equipments;
 
+import codinggame.objs.robots.FarmingRobot;
 import codinggame.objs.robots.MinerRobot;
 import codinggame.objs.robots.Robot;
 import codinggame.utils.Utils;
@@ -17,7 +18,7 @@ import java.util.List;
  * @author Welcome
  */
 public enum EquipmentSlot {
-    DRILL(IColor.ORANGE, MinerRobot.class);
+    DRILL(IColor.ORANGE, MinerRobot.class), HOE(IColor.LIME, FarmingRobot.class);
     
     private List<Class<? extends Robot>> robotTypes;
     private IColor color;

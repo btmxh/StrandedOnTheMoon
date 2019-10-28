@@ -25,8 +25,8 @@ import org.lwjgl.opengl.GL13;
  * @author Welcome
  */
 public abstract class ItemType implements Serializable, Compound{
-    private transient NVGImage nvgTexture;
-    private transient final Texture2D texture;
+    protected transient NVGImage nvgTexture;
+    protected transient final Texture2D texture;
     private final String name;
     
     public ItemType(String path, String name) {

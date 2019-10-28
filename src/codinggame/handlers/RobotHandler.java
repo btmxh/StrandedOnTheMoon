@@ -9,6 +9,7 @@ import codinggame.globjs.Camera;
 import codinggame.objs.robots.Robot;
 import codinggame.states.GameState;
 import codinggame.states.InputProcessor;
+import codinggame.ui.codingarea.CodingFX;
 import com.lwjglwrapper.nanovg.NVGGraphics;
 import java.io.File;
 import java.io.FileInputStream;
@@ -38,12 +39,9 @@ public class RobotHandler {
     }
     
     public void render(NVGGraphics g) {
-        g.begin();
-        game.getMapViewport().updateScissor(g);
         for (Robot robot : robots.values()) {
             robot.render(g);
         }
-        g.end();
     }
     
     private void addRobot(Robot robot) {
@@ -54,6 +52,8 @@ public class RobotHandler {
     public void selectRobot(Robot robot) {
         selected = robot;
         game.select(robot);
+        if(CodingFX.currentController == null || !CodingFX.isShowing())   return;
+        CodingFX.currentController.addRobot(robot);
     }
     
     public void selectRobot(String name) {

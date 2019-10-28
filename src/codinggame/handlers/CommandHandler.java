@@ -10,6 +10,7 @@ import codinggame.lang.Command;
 import codinggame.lang.CommandBlock;
 import codinggame.objs.robots.Robot;
 import codinggame.states.GameState;
+import codinggame.ui.codingarea.CodingFX;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -24,7 +25,7 @@ public class CommandHandler {
     
     private GameState game;
     private List<CommandBlock> blocks;
-    private List<Command> commands;
+    private final List<Command> commands;
     private boolean stop;
     
     private Map<Robot, Thread> threads;
@@ -45,13 +46,15 @@ public class CommandHandler {
             }
             block.update(delta);
         }
-        for (Iterator<Command> it = commands.iterator(); it.hasNext();) {
-            Command command = it.next();
-            if(command.isOver()) {
-                command.end();
-                it.remove();
+        synchronized (commands) {
+            for (Iterator<Command> it = commands.iterator(); it.hasNext();) {
+                Command command = it.next();
+                if(command.isOver()) {
+                    command.end();
+                    it.remove();
+                }
+                command.update(delta);
             }
-            command.update(delta);
         }
         for (Iterator<Map.Entry<Robot, Thread>> it = threads.entrySet().iterator(); it.hasNext();) {
             Map.Entry<Robot, Thread> entry = it.next();
@@ -70,7 +73,9 @@ public class CommandHandler {
     public void execute(Command command) {
         if(command == null) return;
         command.begin();
-        commands.add(command);
+        synchronized (commands) {
+            commands.add(command);
+        }
     }
     
     public void addThread(Robot robot, Thread thread) {
@@ -87,8 +92,7 @@ public class CommandHandler {
     }
     
     public void throwExecutionError(Command command, String description) {
-        GameUIHandler uiHandler = CodingGame.getInstance().gs.getUIHandler();
-        uiHandler.println("Execution error: " + description);
+        CodingFX.currentController.println("Execution error: " + description);
         Command.getRootCommandBlock(command).stop();
     }
 

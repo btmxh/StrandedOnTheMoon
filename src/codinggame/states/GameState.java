@@ -12,13 +12,17 @@ import codinggame.handlers.CommandHandler;
 import codinggame.handlers.GameUIHandler;
 import codinggame.handlers.MapHandler;
 import codinggame.handlers.RobotHandler;
+import codinggame.map.MapTile;
+import codinggame.map.cells.FacingCell;
 import codinggame.map.proceduralmap.chunkloading.ChunkThread;
 import codinggame.objs.Clock;
+import codinggame.objs.buildings.Building;
+import codinggame.objs.buildings.Greenhouse;
 import codinggame.objs.items.ItemTypes;
-import codinggame.objs.modules.ModuleTextures;
 import codinggame.objs.modules.SolarPanelModule;
 import codinggame.objs.modules.SpeedModule;
 import codinggame.objs.robots.CraftingRobot;
+import codinggame.objs.robots.FarmingRobot;
 import codinggame.objs.robots.MinerRobot;
 import com.lwjglwrapper.LWJGL;
 import com.lwjglwrapper.display.Viewport;
@@ -26,10 +30,12 @@ import com.lwjglwrapper.opengl.GLCalls;
 import com.lwjglwrapper.opengl.objects.FBO;
 import com.lwjglwrapper.opengl.objects.RBO;
 import com.lwjglwrapper.opengl.objects.Texture2D;
+import com.lwjglwrapper.opengl.objects.TextureData;
 import com.lwjglwrapper.utils.IColor;
 import com.lwjglwrapper.utils.Logger;
 import com.lwjglwrapper.utils.states.State;
 import java.util.logging.Level;
+import javafx.application.Platform;
 import org.joml.Rectanglef;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
@@ -45,10 +51,6 @@ import org.lwjgl.opengl.GL30;
  */
 public class GameState extends State<CodingGame>{
     
-//    public static final int TILE_PIXEL_WIDTH = 32, TILE_PIXEL_HEIGHT = 32;
-    //Map
-//    private GameMap map;
-//    private MapRenderer renderer;
     //FBOs
     boolean recreateFBO = true;
     FBO gameFBO;
@@ -68,10 +70,12 @@ public class GameState extends State<CodingGame>{
     
     private InputProcessor inputProcessor;
     
+    private Building building;
+    
     public GameState(CodingGame game) {
         super(game);
+        Logger.enable = true;
         ItemTypes.initTypes();
-        ModuleTextures.init();
         inputProcessor = InputProcessor.GAME;
         LWJGL.window.getWindowCallbacks().getWindowCloseCallback().add(new GLFWWindowCloseCallback() {
             @Override
@@ -80,6 +84,7 @@ public class GameState extends State<CodingGame>{
                     ChunkThread.stopThread();
                     robotHandler.writeRobots();
                     mapHandler.save(clock);
+                    Platform.exit();
                 }).start();
             }
         });
@@ -97,12 +102,14 @@ public class GameState extends State<CodingGame>{
             robotHandler.addRobot(new CraftingRobot(this, new Vector2f(7.5f, 5.5f), "crafter"), false);
         }
         robotHandler.getRobot("miner").getInventory().setModule(0, new SolarPanelModule(this, 0.2, 1));
-        robotHandler.getRobot("miner").getInventory().setModule(1, new SpeedModule(this));
-        robotHandler.getRobot("miner").getInventory().setModule(2, new SpeedModule(this));
-        robotHandler.getRobot("miner").getInventory().setModule(3, new SpeedModule(this));
+            robotHandler.addRobot(new FarmingRobot(this, new Vector2f(7.5f, 10.5f), "farmer"), false);
         
         gameUIHandler = new GameUIHandler(LWJGL.window, this);
         commandHandler = new CommandHandler(this);
+        
+        
+        building = new Greenhouse(new Vector2f(6), 10, 10);
+        building.setTiles(mapHandler.getMap().getTilesets());
         
     }
 
@@ -140,36 +147,24 @@ public class GameState extends State<CodingGame>{
             recreateFBO = false;
         }
         GLCalls.setClearColor(new IColor(0.1f));
-        GLCalls.enable(GL11.GL_SCISSOR_TEST);
         GLCalls.clear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_STENCIL_BUFFER_BIT);
         GLCalls.enable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         
         gameFBO.bind();
-        GLCalls.setClearColor(new IColor(0.1f));
-        GLCalls.enable(GL11.GL_SCISSOR_TEST);
+        GLCalls.setClearColor(new IColor(0f));
         GLCalls.clear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_STENCIL_BUFFER_BIT);
         
-        GLCalls.enable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        
-        LWJGL.graphics.begin();
-        LWJGL.graphics.rect(0, 0, LWJGL.window.getWidth(), LWJGL.window.getHeight());
-        LWJGL.graphics.fill(IColor.BLACK);
-        
-        LWJGL.graphics.rect(0, 0, 100, 100);
-        LWJGL.graphics.fill(IColor.RED);
-        
-        
-        LWJGL.graphics.end();
-        
         mapHandler.render(!robotHandler.hoveringOnRobots() && inputProcessor == InputProcessor.GAME);
+        mapHandler.renderBuilding(building, camera);
         windowViewport.set(LWJGL.window);
         
+        LWJGL.graphics.begin();
         robotHandler.render(LWJGL.graphics);
         windowViewport.updateScissor(LWJGL.graphics);
         LWJGL.graphics.strokeWeight(2);
-        gameUIHandler.render(LWJGL.graphics);   //it will auto end the graphics
+        gameUIHandler.render(LWJGL.graphics);
+        LWJGL.graphics.end();
         gameFBO.unbind();
         
         new RenderableTexture(new Rectanglef(0, 0, LWJGL.window.getWidth(), LWJGL.window.getHeight()), gameTexture).render(true);

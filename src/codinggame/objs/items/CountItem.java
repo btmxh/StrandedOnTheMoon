@@ -9,10 +9,10 @@ package codinggame.objs.items;
  *
  * @author Welcome
  */
-public class CountItem extends Item {
+public class CountItem<T extends ItemType.Count> extends Item<T> {
     private int amount;
 
-    public CountItem(ItemType.Count itemType, int amount) {
+    public CountItem(T itemType, int amount) {
         super(itemType);
         this.amount = amount;
     }
@@ -23,11 +23,6 @@ public class CountItem extends Item {
 
     public void setAmount(int amount) {
         this.amount = amount;
-    }
-
-    @Override
-    public ItemType.Count getItemType() {
-        return (ItemType.Count) super.getItemType();
     }
 
     @Override
