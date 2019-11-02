@@ -7,7 +7,7 @@ package codinggame.ui;
 
 import com.lwjglwrapper.nanovg.NVGFont;
 import com.lwjglwrapper.nanovg.NVGGraphics;
-import com.lwjglwrapper.utils.IColor;
+import com.lwjglwrapper.utils.colors.StaticColor;
 import com.lwjglwrapper.utils.geom.PaintedShape;
 import com.lwjglwrapper.utils.geom.Shape;
 import com.lwjglwrapper.utils.geom.shapes.GLRect;
@@ -31,8 +31,8 @@ public class IComboBox extends ComboBox{
     private GLRect bounds;
     private NVGFont textFont;
     
-    private static final IColor COLOR = IColor.GRAY;
-    private static final IColor HOVER_COLOR = new IColor(0.82f);
+    private static final StaticColor COLOR = StaticColor.GRAY;
+    private static final StaticColor HOVER_COLOR = new StaticColor(0.82f);
     
     private static final float BAR_WIDTH = 20, TEXT_OFFSET = 4, CELL_OFFSET = 5;
     
@@ -46,18 +46,18 @@ public class IComboBox extends ComboBox{
     }
 
     private Shape normalShape() {
-        return createShape(COLOR, new IColor(0.4f), new IColor(0.2f));
+        return createShape(COLOR, new StaticColor(0.4f), new StaticColor(0.2f));
     }
 
     private Shape hoverShape() {
-        return createShape(HOVER_COLOR, new IColor(0.4f), new IColor(0.2f));
+        return createShape(HOVER_COLOR, new StaticColor(0.4f), new StaticColor(0.2f));
     }
 
     private Shape clickedShape() {
-        return createShape(COLOR.darker(), new IColor(0.4f), new IColor(0.2f));
+        return createShape(COLOR.darker(), new StaticColor(0.4f), new StaticColor(0.2f));
     }
     
-    private Shape createShape(IColor color, IColor barColor, IColor arrowColor) {
+    private Shape createShape(StaticColor color, StaticColor barColor, StaticColor arrowColor) {
         return new Shape() {
             @Override
             public Rectanglef boundBox() {
@@ -83,7 +83,7 @@ public class IComboBox extends ComboBox{
                 
                 g.textAlign(NanoVG.NVG_ALIGN_LEFT | NanoVG.NVG_ALIGN_MIDDLE);
                 g.textSize(bounds.getHeight().get() * 0.7f);
-                g.textPaint(IColor.WHITE);
+                g.textPaint(StaticColor.WHITE);
                 g.text(((IComboBoxCell) cells.get(selectedIndex)).content, bounds.getX().get() + CELL_OFFSET + TEXT_OFFSET, bounds.centerY().get() + 2);
             }
         };
@@ -102,7 +102,7 @@ public class IComboBox extends ComboBox{
     public static class IComboBoxCell extends ComboBoxCell {
         
         private String content;
-        private static final IColor HOVER_COLOR = new IColor(0.23f, 0.60f, 0.86f);
+        private static final StaticColor HOVER_COLOR = new StaticColor(0.23f, 0.60f, 0.86f);
         
         public IComboBoxCell(ComboBox comboBox, String content) {
             super(comboBox, true);
@@ -123,7 +123,7 @@ public class IComboBox extends ComboBox{
             return createShape(COLOR.darker());
         }
         
-        private Shape createShape(IColor color) {
+        private Shape createShape(StaticColor color) {
             return new Shape() {
                 @Override
                 public Rectanglef boundBox() {
@@ -140,7 +140,7 @@ public class IComboBox extends ComboBox{
                     comboBox.textFont.use();
                     g.textAlign(NanoVG.NVG_ALIGN_LEFT | NanoVG.NVG_ALIGN_MIDDLE);
                     g.textSize(comboBox.bounds.getHeight().get() * 0.7f);
-                    g.textPaint(IColor.WHITE);
+                    g.textPaint(StaticColor.WHITE);
                     g.text(content, CELL_OFFSET + TEXT_OFFSET, comboBox.getCellHeight() / 2);
                     
                 }

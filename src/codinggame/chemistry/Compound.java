@@ -5,10 +5,12 @@
  */
 package codinggame.chemistry;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Welcome
  */
-public interface Compound {
+public interface Compound extends Serializable{
     public ElementGroup getCompound();
 }

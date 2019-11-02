@@ -23,7 +23,7 @@ import com.lwjglwrapper.opengl.shaders.Shader;
 import com.lwjglwrapper.opengl.shaders.ShaderFile;
 import com.lwjglwrapper.opengl.shaders.uniforms.variables.UInt;
 import com.lwjglwrapper.opengl.shaders.uniforms.variables.UVec2;
-import com.lwjglwrapper.utils.IColor;
+import com.lwjglwrapper.utils.colors.StaticColor;
 import java.text.DecimalFormat;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
@@ -102,7 +102,7 @@ public class CellRenderer {
                         mapHandler.chooseTile(layerOrBuilding, x, y);
                     } else if(LWJGL.mouse.mouseReleased(GLFW.GLFW_MOUSE_BUTTON_RIGHT)) {
                         //Testing
-                        mapHandler.getMap().getMapLayer(GameMap.ORE_LAYER).setTileAt(x, y, new ColoredCell(IColor.RED, mapHandler.getMap().getTilesets().getTileByID(MapTile.GLASS)));
+                        mapHandler.getMap().getMapLayer(GameMap.ORE_LAYER).setTileAt(x, y, new ColoredCell(StaticColor.RED, mapHandler.getMap().getTilesets().getTileByID(MapTile.GLASS)));
                     }
                 }
             } else umhover.load(0);

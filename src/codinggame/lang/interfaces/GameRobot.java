@@ -5,15 +5,15 @@
  */
 package codinggame.lang.interfaces;
 
-import codinggame.CodingGame;
-import codinggame.handlers.CommandHandler;
-import codinggame.lang.CommandBlock;
 import codinggame.lang.commands.CraftCommand;
 import codinggame.lang.commands.EquipCommand;
 import codinggame.lang.commands.GiveCommand;
 import codinggame.lang.commands.GoCommand;
+import codinggame.lang.commands.HarvestCommand;
 import codinggame.lang.commands.HoeCommand;
 import codinggame.lang.commands.MineCommand;
+import codinggame.lang.commands.PlantCommand;
+import codinggame.lang.commands.utils.Direction;
 import codinggame.objs.RobotInventory;
 import codinggame.objs.crafting.Recipes;
 import codinggame.objs.items.CountItem;
@@ -37,14 +37,14 @@ public class GameRobot extends GameObject{
         super(game, robot);
     }
     
-    public void go(int moveX, int moveY) {
-        executor.execute(new GoCommand(game, null, robot, executor, new Vector2i(moveX, moveY)));
+    public void go(int move, int direction) {
+        executor.execute(new GoCommand(game, null, robot, executor, move, Direction.values()[direction]));
         super.lock();
         super.testInterupt();
     }
     
     public void mine(int direction) {
-        executor.execute(new MineCommand(game, null, robot, executor, MineCommand.Direction.values()[direction]));
+        executor.execute(new MineCommand(game, null, robot, executor, Direction.values()[direction]));
         super.lock();
         super.testInterupt();
     }
@@ -62,7 +62,13 @@ public class GameRobot extends GameObject{
     }
     
     public void hoe() {
-        executor.execute(new HoeCommand(game, currentBlock, robot, executor));
+        executor.execute(new HoeCommand(game, null, robot, executor));
+        super.lock();
+        super.testInterupt();
+    }
+    
+    public void plant(String item) {
+        executor.execute(new PlantCommand(game, null, robot, executor, ItemTypes.getItemByName(item)));
         super.lock();
         super.testInterupt();
     }
@@ -75,7 +81,13 @@ public class GameRobot extends GameObject{
         } else if(itemType instanceof ItemType.Mass) {
             giveItem = new MassItem((ItemType.Mass) itemType, amount);
         } else giveItem = null;
-        executor.execute(new GiveCommand(game, currentBlock, robot, executor, robot, giveItem));
+        executor.execute(new GiveCommand(game, null, this.robot, executor, robot, giveItem));
+        super.lock();
+        super.testInterupt();
+    }
+    
+    public void harvest() {
+        executor.execute(new HarvestCommand(game, null, robot, executor));
         super.lock();
         super.testInterupt();
     }

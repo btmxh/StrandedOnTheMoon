@@ -7,7 +7,7 @@ package codinggame.map.cells;
 
 import codinggame.map.MapTile;
 import codinggame.map.proceduralmap.ProcMapCell;
-import com.lwjglwrapper.utils.IColor;
+import com.lwjglwrapper.utils.colors.StaticColor;
 import org.joml.Vector4f;
 
 /**
@@ -16,14 +16,14 @@ import org.joml.Vector4f;
  */
 public class ColoredCell extends DataCell{
     
-    private IColor color;
+    private StaticColor color;
 
-    public ColoredCell(IColor color, MapTile tile) {
+    public ColoredCell(StaticColor color, MapTile tile) {
         super(tile);
         this.color = color;
     }
 
-    public IColor getColor() {
+    public StaticColor getColor() {
         return color;
     }
 

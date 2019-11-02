@@ -10,21 +10,16 @@ import codinggame.handlers.MapHandler;
 import codinggame.lang.Command;
 import codinggame.lang.CommandBlock;
 import codinggame.lang.Parser;
+import codinggame.lang.commands.utils.Direction;
 import codinggame.map.GameMap;
 import codinggame.map.MapCell;
-import codinggame.map.MapLayer;
-import codinggame.map.MapTile;
-import codinggame.map.proceduralmap.ProcMapCell;
 import codinggame.objs.Inventory;
 import codinggame.objs.items.Item;
-import codinggame.objs.items.ItemTypes;
-import codinggame.objs.items.MassItem;
 import codinggame.objs.items.equipments.EquipmentSlot;
 import codinggame.objs.robots.MinerRobot;
 import codinggame.objs.robots.Robot;
 import codinggame.states.GameState;
 import java.util.List;
-import org.joml.Vector2i;
 
 /**
  *
@@ -52,13 +47,17 @@ public class MineCommand extends Command{
         int y = direction.getY(executingRobot.getTileY());
         MinerRobot miner = (MinerRobot) executingRobot;
         MapHandler mapHandler = game.getMapHandler();
-        List<Item> drop = mapHandler.breakTile(miner.getInventory().getEquipment(EquipmentSlot.DRILL), GameMap.ORE_LAYER, x, y);
-        if(drop == null) {
+        MapHandler.BreakTile breakTile = mapHandler.breakTile(miner.getInventory().getEquipment(EquipmentSlot.DRILL), GameMap.ORE_LAYER, x, y);
+        if(breakTile == null) {
             executor.throwExecutionError(this, "Cannot mine tile");
             return;
         }
         Inventory inv = miner.getInventory();
-        drop.forEach(inv::add);
+        if(inv.addAll(breakTile.getItems())) {
+            breakTile.destroy();
+        } else {
+            executor.throwExecutionError(this, "Not Enough Storage");
+        }
     }
 
     @Override
@@ -84,39 +83,6 @@ public class MineCommand extends Command{
         }
     }
     
-    
-    
-    
-    
-    public enum Direction {
-        UP(0, 1), DOWN(0, -1), LEFT(-1, 0), RIGHT(1, 0);
-        
-        private int x, y;
-
-        private Direction(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-        
-        private int getX(int robotX) {
-            return x + robotX;
-        }
-        
-        private int getY(int robotY) {
-            return y + robotY;
-        }
-        
-        private static Direction get(Parser parser, String name) {
-            Direction[] directions = values();
-            for (Direction direction : directions) {
-                if(direction.name().equalsIgnoreCase(name)) {
-                    return direction;
-                }
-            }
-            parser.throwParsingError(name + " is not a valid go direction");
-            return null;
-        }
-    }
     public static Command parseCommand(GameState game, Parser parser,
             CommandBlock parentCommandBlock, Robot executingRobot,
             String[] tokens, CommandHandler executor) {

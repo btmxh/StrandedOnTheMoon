@@ -5,8 +5,10 @@
  */
 package codinggame.utils;
 
+import codinggame.objs.items.ItemType;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -66,6 +68,19 @@ public class ArrayMap<K, V> extends ArrayList<Pair<K, V>>{
     
     public List<V> values() {
         return stream().map(Pair::getValue).collect(Collectors.toList());
+    }
+
+    public void removeKey(K key) {
+        for (Iterator<Pair<K, V>> it = this.iterator(); it.hasNext();) {
+            Pair<K, V> pair = it.next();
+            if(equals(pair.getKey(), key))  it.remove();
+        }
+    }
+    
+    private static boolean equals(Object o1, Object o2) {
+        if(o1 == o2)    return true;
+        if(o1 == null)  return false;
+        else return o1.equals(o2);
     }
     
 }

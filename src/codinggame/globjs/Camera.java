@@ -12,6 +12,7 @@ import com.lwjglwrapper.LWJGL;
 import com.lwjglwrapper.display.Viewport;
 import com.lwjglwrapper.utils.math.MathUtils;
 import java.awt.Point;
+import java.text.DecimalFormat;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWScrollCallback;
@@ -74,10 +75,14 @@ public class Camera {
     }
 
     public Point getChunk() {
-        Vector2f centerTile = getPixelTranslation().negate().add(LWJGL.window.getWidth() / 2, 0).mul(1 / tileSize);
+        Vector2f centerTile = getCenteredTile();
         int chunkX = (int) Math.floor(centerTile.x / ProcMapChunk.CHUNK_SIZE);
         int chunkY = (int) -Math.floor(centerTile.y / ProcMapChunk.CHUNK_SIZE);
         return new Point(chunkX, chunkY);
+    }
+    
+    public Vector2f getCenteredTile() {
+        return getPixelTranslation().negate().add(LWJGL.window.getWidth() / 2, LWJGL.window.getHeight() / 2).mul(1 / tileSize);
     }
 
 }

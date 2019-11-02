@@ -39,6 +39,7 @@ public class MapHandler {
     private final GameState game;
     private GameMap map;
     private MapRenderer renderer;
+    private TileUpdateHandler tileUpdateHandler;
     
     public MapHandler(GameState game, Clock clock) {
         this.game = game;
@@ -50,7 +51,7 @@ public class MapHandler {
         }
         this.renderer = new MapRenderer();
         renderer.setOriginPosition(-1, -1);
-        
+        tileUpdateHandler = new TileUpdateHandler(game, this);
     }
     
     public void update(Camera camera) {
@@ -67,6 +68,7 @@ public class MapHandler {
             chunkY = 0;
             ((ProcMap) map).update(chunkX, chunkY);
         }
+        tileUpdateHandler.update();
     }
     
     public void render(boolean notHoveringOnRobots) {
@@ -87,23 +89,33 @@ public class MapHandler {
         return map;
     }
     
-    public List<Item> breakTile(Item tool, int layer, int x, int y) {
+    public BreakTile breakTile(Item tool, int layer, int x, int y) {
         MapLayer mapLayer = map.getMapLayer(layer);
         MapCell cell = mapLayer.getTileAt(x, y);
         MapTile tile;
+        BreakTile breakTile = new BreakTile(mapLayer, x, y);
         if(cell == null? true:(tile = cell.getTileType()) == null) {
             return null;
         } else {
-            if(tile.getID() == MapTile.COPPER_ORE) {
-                if(tool instanceof Drill) {
-                    mapLayer.setTileAt(x, y, (MapTile) null);
-                    return Arrays.asList(new MassItem(ItemTypes.COPPER_ORE, rand(10, 20)));
-                }
-            } else if(tile.getID() == MapTile.MOON_ROCK) {
-                if(tool instanceof Drill) {
-                    mapLayer.setTileAt(x, y, (MapTile) null);
-                    return Arrays.asList(new MassItem(ItemTypes.MOON_ROCK, 16));
-                }
+            switch (tile.getID()) {
+                case MapTile.COPPER_ORE:
+                    if(tool instanceof Drill) {
+                        return breakTile.setItems(new MassItem(ItemTypes.COPPER_ORE, rand(10, 20)));
+                    }   break;
+                case MapTile.MOON_ROCK:
+                    if(tool instanceof Drill) {
+                        return breakTile.setItems(new MassItem(ItemTypes.MOON_ROCK, 16));
+                    }   break;
+                case MapTile.ICE:
+                    if(tool instanceof Drill) {
+                        return breakTile.setItems(new MassItem(ItemTypes.ICE, 3f));
+                    }   break;
+                case MapTile.IRON_ORE:
+                    if(tool instanceof Drill) {
+                        return breakTile.setItems(new MassItem(ItemTypes.IRON_ORE, rand(10, 15)));
+                    }   break;
+                default:
+                    break;
             }
             return null;
         }
@@ -141,14 +153,47 @@ public class MapHandler {
     public ChooseTile chooseTile;
     
     public void chooseTile(Object layerOrBuilding, int x, int y) {
+        if(tileChoosen(layerOrBuilding, x, y))  return;
         chooseTile = new ChooseTile(x, y, layerOrBuilding);
-        CodingGame.getInstance().gs.select(chooseTile);
+        GameState game = CodingGame.getInstance().gs;
+        game.select(chooseTile);
     }
     
     public boolean tileChoosen(Object layerOrBuilding, int x, int y) {
         if(CodingGame.getInstance().gs.getSelectedObject() instanceof ChooseTile) 
             return chooseTile == null? false:chooseTile.x == x && chooseTile.y == y && chooseTile.layerOrBuilding == layerOrBuilding;
         else return false;
+    }
+    
+    public static class BreakTile {
+        private List<Item> items;
+        private MapLayer layer;
+        private int x, y;
+
+        public BreakTile(MapLayer layer, int x, int y) {
+            this.items = items;
+            this.layer = layer;
+            this.x = x;
+            this.y = y;
+        }
+        
+        public void destroy() {
+            layer.setTileAt(x, y, (MapTile) null);
+        }
+
+        public List<Item> getItems() {
+            return items;
+        }
+
+        private BreakTile setItems(List<Item> items) {
+            this.items = items;
+            return this;
+        }
+        
+        private BreakTile setItems(Item... items) {
+            this.items = Arrays.asList(items);
+            return this;
+        }
     }
     
 }

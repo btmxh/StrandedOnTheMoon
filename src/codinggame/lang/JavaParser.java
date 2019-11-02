@@ -86,6 +86,7 @@ public class JavaParser {
         code = "public class " + className + " extends GameRobot {\n" + code + "\n\n}"; 
         
         importStatements.add("import codinggame.lang.interfaces.*;");
+        importStatements.add("import static codinggame.lang.interfaces.Constants.*;");
         importStatements.add("import codinggame.states.*;");
         importStatements.add("import codinggame.objs.*;");
         importStatements.add("import codinggame.objs.robots.*;");

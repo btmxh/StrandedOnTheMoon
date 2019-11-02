@@ -8,24 +8,27 @@ package codinggame.ui.codingarea;
 import codinggame.CodingGame;
 import codinggame.lang.JavaParser;
 import codinggame.objs.robots.Robot;
+import codinggame.states.GameState;
 import com.jfoenix.controls.JFXButton;
 import in.co.s13.syntaxtextareafx.SyntaxTextAreaFX;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.binding.IntegerBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
 import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Control;
@@ -35,6 +38,10 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Pair;
 import javax.swing.SwingUtilities;
@@ -52,6 +59,8 @@ import org.fife.ui.rtextarea.RTextScrollPane;
  */
 public class WindowController implements Initializable {
 
+    private Map<String, Image> images = new HashMap<>();
+    
     private Theme codingAreaTheme;
     @FXML
     private TextArea outputTextArea;
@@ -84,10 +93,11 @@ public class WindowController implements Initializable {
         setIcon(run, "run");
         setIcon(compile, "compile");
         setIcon(runAndCompile, "compile_run");
+        images.put("stop", new Image(WindowController.class.getResource("stop.png").toString(), 24, 24, true, true, true));
         
-        setTooltip(run, "Run your Compiled Program");
-        setTooltip(compile, "Compile your Program");
-        setTooltip(runAndCompile, "Compile and Run your Program");
+        setTooltip(run, "Run your Compiled Program (Shift + F5)");
+        setTooltip(compile, "Compile your Program (F6)");
+        setTooltip(runAndCompile, "Compile and Run your Program (F5)");
         
         run.setOnAction((evt) -> run(evt));
         compile.setOnAction((evt) -> compile(evt));
@@ -107,7 +117,9 @@ public class WindowController implements Initializable {
     }    
     
     public void setIcon(JFXButton button, String iconName) {
-        ImageView imageView = new ImageView(new Image(WindowController.class.getResource(iconName + ".png").toString(), 24, 24, true, true, true));
+        Image image = new Image(WindowController.class.getResource(iconName + ".png").toString(), 24, 24, true, true, true);
+        images.put(iconName, image);
+        ImageView imageView = new ImageView(image);
         imageView.setFitHeight(16);
         imageView.setFitWidth(16);
         button.setGraphic(imageView);
@@ -120,15 +132,35 @@ public class WindowController implements Initializable {
     }
     
     public void run(ActionEvent evt) {
-        clearOutput();
-        Robot currentRobot = ((RobotTab) codeAreaPane.getSelectionModel().getSelectedItem()).robot;
-        Runnable main = null;
-        try {
-            main = parser.getMainMethod(new Pair<>(currentRobot, lastClasses.get(currentRobot)));
-        } catch (NoSuchMethodException ex) {
-            println("No Main Method");
+        ImageView graphic = (ImageView) run.getGraphic();
+        if(graphic.getImage() == images.get("run")) {
+            clearOutput();
+            Robot currentRobot = ((RobotTab) codeAreaPane.getSelectionModel().getSelectedItem()).robot;
+            Runnable main = null;
+            try {
+                main = parser.getMainMethod(new Pair<>(currentRobot, lastClasses.get(currentRobot)));
+            } catch (NoSuchMethodException ex) {
+                println("No Main Method");
+            }
+            final Runnable _main = main;
+            new Thread(){
+                @Override
+                public void run() {
+                    Platform.runLater(() -> {
+                        ((ImageView) run.getGraphic()).setImage(images.get("stop"));
+                        runAndCompile.setDisable(true);
+                    });
+                    _main.run();
+                    Platform.runLater(() -> {
+                        ((ImageView) run.getGraphic()).setImage(images.get("run"));
+                        runAndCompile.setDisable(false);
+                    });
+                }
+            }.start();
+        } else {
+            GameState game = CodingGame.getInstance().getGameState();
+            game.getCommandHandler().stop(((RobotTab) codeAreaPane.getSelectionModel().getSelectedItem()).robot);
         }
-        new Thread(main).start();
     }
     
     public void compile(ActionEvent evt) {
@@ -136,13 +168,33 @@ public class WindowController implements Initializable {
             parser.setGameState(CodingGame.getInstance().getGameState());
             RobotTab currentTab = (RobotTab) codeAreaPane.getSelectionModel().getSelectedItem();
             Class clazz = parser.loadClass(currentTab.swingCodingArea.getText(), loggerWriter());
-            lastClasses.put(currentTab.robot, clazz);
+            if(clazz != null)   lastClasses.put(currentTab.robot, clazz);
         }).start();
     }
     
     public void runAndCompile(ActionEvent evt) {
-        compile(evt);
-        run(evt);
+        new Thread(() -> {
+            parser.setGameState(CodingGame.getInstance().getGameState());
+            RobotTab currentTab = (RobotTab) codeAreaPane.getSelectionModel().getSelectedItem();
+            Robot robot = currentTab.robot;
+            Class clazz = parser.loadClass(currentTab.swingCodingArea.getText(), loggerWriter());
+            lastClasses.put(currentTab.robot, clazz);
+            clearOutput();
+            Platform.runLater(() -> {
+                ((ImageView) run.getGraphic()).setImage(images.get("stop"));
+                runAndCompile.setDisable(true);
+            });
+            try {
+                Runnable main = parser.getMainMethod(new Pair<>(robot, lastClasses.get(robot)));
+                main.run();
+            } catch (NoSuchMethodException ex) {
+                println("No Main Method");
+            }
+            Platform.runLater(() -> {
+                ((ImageView) run.getGraphic()).setImage(images.get("run"));
+                runAndCompile.setDisable(false);
+            });
+        }).start();
     }
 
     private PrintWriter writer;
@@ -176,6 +228,21 @@ public class WindowController implements Initializable {
 
     private void clearOutput() {
         outputTextArea.clear();
+    }
+
+    void after_load_init() {
+        CodingFX.currentScene.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+            final KeyCombination runAndCompile = new KeyCodeCombination(KeyCode.F5);
+            final KeyCombination compile = new KeyCodeCombination(KeyCode.F6);
+            final KeyCombination run = new KeyCodeCombination(KeyCode.F5, KeyCombination.SHIFT_DOWN);
+            
+            @Override
+            public void handle(KeyEvent evt) {
+                if(runAndCompile.match(evt))  runAndCompile(null);
+                else if(compile.match(evt)) compile(null);
+                else if(run.match(evt))   run(null);
+            }
+        });
     }
 
     private class LogWriter extends Writer{
@@ -293,7 +360,5 @@ public class WindowController implements Initializable {
         }
         
     }
-
-    
     
 }

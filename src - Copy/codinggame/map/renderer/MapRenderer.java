@@ -10,7 +10,6 @@ import codinggame.map.GameMap;
 import codinggame.map.MapCell;
 import codinggame.map.MapLayer;
 import codinggame.map.MapTile;
-import codinggame.map.proceduralmap.ProcMapCell;
 import com.lwjglwrapper.LWJGL;
 import com.lwjglwrapper.display.Viewport;
 import com.lwjglwrapper.opengl.objects.Texture2D;

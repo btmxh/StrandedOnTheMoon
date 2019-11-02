@@ -7,7 +7,7 @@ package codinggame.ui;
 
 import codinggame.handlers.GameUIHandler;
 import com.lwjglwrapper.nanovg.NVGGraphics;
-import com.lwjglwrapper.utils.IColor;
+import com.lwjglwrapper.utils.colors.StaticColor;
 import com.lwjglwrapper.utils.geom.PaintedShape;
 import com.lwjglwrapper.utils.geom.Shape;
 import com.lwjglwrapper.utils.geom.shapes.Rect;
@@ -44,15 +44,15 @@ public abstract class Tab extends Panel {
 
         button = new Button(stage, false);
         button.getShapeStates().reset().setAll(buttonBounds)
-                .setAllStrokes(IColor.BLACK)
-                .setFill(IColor.GRAY, NORMAL)
-                .setFill(IColor.LIGHTGRAY, HOVER)
-                .setFill(IColor.DARKGRAY, CLICKED)
+                .setAllStrokes(StaticColor.BLACK)
+                .setFill(StaticColor.GRAY, NORMAL)
+                .setFill(StaticColor.LIGHTGRAY, HOVER)
+                .setFill(StaticColor.DARKGRAY, CLICKED)
                 .setAllAfterPaints((g) -> {
                     Rectanglef rect = buttonBounds.getJOMLRect();
                     final float WIDTH = rect.maxX - rect.minX, HEIGHT = rect.maxY - rect.minY;
                     final float TRIANGLE_SIZE = 10, TEXT_SIZE = HEIGHT / 1.5f;
-                    g.setUpText(GameUIHandler.textFont, IColor.WHITE, TEXT_SIZE, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
+                    g.setUpText(GameUIHandler.textFont, StaticColor.WHITE, TEXT_SIZE, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
                     g.text(this.text, 10, HEIGHT / 2);
                     float[] ys;
                     if (open) {
@@ -63,7 +63,7 @@ public abstract class Tab extends Panel {
                     g.polygon(new float[]{
                         WIDTH - TRIANGLE_SIZE * 2, WIDTH - TRIANGLE_SIZE, WIDTH - TRIANGLE_SIZE * 1.5f
                     }, ys, 3);
-                    g.fill(IColor.WHITE);
+                    g.fill(StaticColor.WHITE);
                     g.translate(0, HEIGHT);
                 }).construct(false);
         button.setOnClickListener((s, b, m) -> {

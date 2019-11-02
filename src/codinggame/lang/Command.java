@@ -26,7 +26,6 @@ import java.util.logging.Logger;
  */
 public abstract class Command {
 
-
     protected GameState game;
     protected CommandHandler executor;
     protected CommandBlock parentCommandBlock;
@@ -47,6 +46,7 @@ public abstract class Command {
         this.energyConsumption = energyConsumption;
         this.parentCommandBlock = parentCommandBlock;
         this.executingRobot = executingRobot;
+        this.executor = executor;
     }
 
     public void update(float delta) {
@@ -71,7 +71,7 @@ public abstract class Command {
 
     public void begin() {
         if (executingRobot.getBattery().getEnergy() < energyConsumption) {
-            getRootCommandBlock(this).forceStop();
+            getRoot(this).forceStop();
         }
     }
 
@@ -119,11 +119,11 @@ public abstract class Command {
         return energyConsumption;
     }
 
-    public static CommandBlock getRootCommandBlock(Command command) {
+    public static Command getRoot(Command command) {
         if (command.parentCommandBlock == null) {
-            return (CommandBlock) command;
+            return command;
         } else {
-            return getRootCommandBlock(command.parentCommandBlock);
+            return getRoot(command.parentCommandBlock);
         }
     }
 
@@ -132,6 +132,15 @@ public abstract class Command {
             CommandBlock parentCommandBlock, Robot executingRobot,
             String[] tokens, CommandHandler executor) {
         return null;
+    }
+
+    public void forceStop() {
+        undoCommand();
+        throw new StopException();
+    }
+
+    public Robot getRobot() {
+        return executingRobot;
     }
 
 }

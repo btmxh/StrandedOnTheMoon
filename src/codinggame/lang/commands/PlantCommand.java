@@ -31,7 +31,7 @@ public class PlantCommand extends Command{
     private MapCell seedCell;
     
     public PlantCommand(GameState game, CommandBlock parentCommandBlock,
-            Robot executingRobot, CommandHandler executor, Item seed) {
+            Robot executingRobot, CommandHandler executor, ItemType seed) {
         super(game, parentCommandBlock, executingRobot, executor);
         if(executingRobot instanceof FarmingRobot) {
             setMaxTime(2);
@@ -45,7 +45,8 @@ public class PlantCommand extends Command{
     
     @Override
     public void end() {
-        Item item = executingRobot.getInventory().getItems().get(ItemTypes.WHEAT_SEED_BAG);
+            System.out.println(executor);
+        Item item = executingRobot.getInventory().getItems().get(ItemTypes.POTATO_SEED_BAG);
         if(item == null)    executor.throwExecutionError(this, "Item not found");
         else {
             CountItem citem = (CountItem) item;
@@ -75,9 +76,8 @@ public class PlantCommand extends Command{
     public void undoCommand() {
     }
 
-    private MapCell seedCell(Item seed, MapTilesets tileset) {
-        ItemType type = seed.getItemType();
-        if(type == ItemTypes.WHEAT_SEED_BAG)    return new SheetCell(tileset.getTileByID(MapTile.WHEAT_CROPS), 0);
+    private MapCell seedCell(ItemType seed, MapTilesets tileset) {
+        if(seed == ItemTypes.POTATO_SEED_BAG)    return new SheetCell(tileset.getTileByID(MapTile.POTATO_CROPS), 0);
         else return null;
     }
     

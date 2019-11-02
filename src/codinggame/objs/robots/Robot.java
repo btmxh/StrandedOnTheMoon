@@ -20,7 +20,7 @@ import codinggame.states.InputProcessor;
 import com.lwjglwrapper.LWJGL;
 import com.lwjglwrapper.display.Viewport;
 import com.lwjglwrapper.nanovg.NVGGraphics;
-import com.lwjglwrapper.utils.IColor;
+import com.lwjglwrapper.utils.colors.StaticColor;
 import com.lwjglwrapper.utils.math.MathUtils;
 import java.io.Serializable;
 import java.util.logging.Level;
@@ -45,7 +45,7 @@ public class Robot implements Serializable{
     protected Vector2f position;
     protected RobotInventory inventory;
     protected Battery battery;
-    protected transient IColor color = IColor.LIME;
+    protected transient StaticColor color = StaticColor.LIME;
     protected transient boolean hovering;
     protected transient boolean stop = false;
     protected String code;
@@ -58,11 +58,12 @@ public class Robot implements Serializable{
         this.position = position;
         inventory = new RobotInventory(30);
         battery = new Battery(50000, 100000);
+        code = sampleCode();
     }
     
     public void update(InputProcessor inputProcessor) {
         Robot selectedRobot = game.getRobotHandler().getCurrentRobot();
-        color = selectedRobot == this? IColor.GOLDENROD:IColor.LIME;
+        color = selectedRobot == this? StaticColor.GOLDENROD:StaticColor.LIME;
         hovering = isBeingHovered() && inputProcessor == InputProcessor.GAME;
         if(hovering) {
             if(LWJGL.mouse.mouseReleased(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
@@ -98,8 +99,8 @@ public class Robot implements Serializable{
             g.push();
             g.translate(MathUtils.clamp(0, x, game.getMapViewport().getWidth() - w), MathUtils.clamp(0, y, game.getMapViewport().getHeight() - h));
             g.rect(0, 0, w, h);
-            g.fill(IColor.LIGHTGRAY);
-            g.setUpText(GameUIHandler.textFont, IColor.WHITE, 20, NanoVG.NVG_ALIGN_LEFT | NanoVG.NVG_ALIGN_TOP);
+            g.fill(StaticColor.LIGHTGRAY);
+            g.setUpText(GameUIHandler.textFont, StaticColor.WHITE, 20, NanoVG.NVG_ALIGN_LEFT | NanoVG.NVG_ALIGN_TOP);
             g.beginPath();
             g.translate(10, 10);
             g.text(getTypeName(), 0, 0);
@@ -231,6 +232,10 @@ public class Robot implements Serializable{
 
     public String getSourceCode() {
         return code;
+    }
+
+    private static String sampleCode() {
+        return "public void main() {\n\t\n}";
     }
     
     

@@ -18,4 +18,5 @@ public interface MapLayer {
     public MapCell getTileAt(int x, int y);
     void setID(int id);
     int getID();
+    
 }

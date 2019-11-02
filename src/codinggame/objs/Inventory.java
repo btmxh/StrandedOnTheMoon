@@ -98,7 +98,7 @@ public class Inventory implements Serializable{
             currentMass -= mass;
             return true;
         } else if(inventoryItem.getMass() == mass) {
-            items.remove(item);
+            items.removeKey(item);
             currentMass -= mass;
             return true;
         } else {
@@ -113,7 +113,7 @@ public class Inventory implements Serializable{
             currentMass -= item.getMassPerItem() * amount;
             return true;
         } else if(inventoryItem.getAmount() == amount) {
-            items.remove(item);
+            items.removeKey(item);
             currentMass -= item.getMassPerItem() * amount;
             return true;
         } else return false;
@@ -181,6 +181,7 @@ public class Inventory implements Serializable{
         currentMass = items.values().stream().mapToDouble(Item::getMass).sum();
     }
     
+    @Override
     public Inventory clone() {
         Inventory clone = new Inventory(maxCapacity);
         clone.currentMass = currentMass;

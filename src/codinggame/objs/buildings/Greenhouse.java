@@ -10,7 +10,7 @@ import codinggame.map.MapTile;
 import codinggame.map.MapTilesets;
 import codinggame.map.cells.ColoredCell;
 import codinggame.map.proceduralmap.ProcMapCell;
-import com.lwjglwrapper.utils.IColor;
+import com.lwjglwrapper.utils.colors.StaticColor;
 import org.joml.Vector2f;
 
 /**
@@ -32,7 +32,7 @@ public class Greenhouse extends Building{
                 if(x == 0 | x == width - 1 | y == 0 | y == height - 1) {
                     cell = new ProcMapCell(tilesets.getTileByID(MapTile.BARRIER));
                 } else {
-                    cell = new ColoredCell(IColor.LIME.alpha(0.1f), tilesets.getTileByID(MapTile.GLASS));
+                    cell = new ColoredCell(StaticColor.LIME.alpha(0.1f), tilesets.getTileByID(MapTile.GLASS));
                 }
                 setTileAt(x, y, cell);
             }

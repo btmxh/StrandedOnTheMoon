@@ -7,11 +7,19 @@ package codinggame.states;
 
 import codinggame.CodingGame;
 import codinggame.globjs.RenderableTexture;
+import codinggame.handlers.GameUIHandler;
+import codinggame.postprocessing.GaussianBlur;
 import com.lwjglwrapper.LWJGL;
-import com.lwjglwrapper.utils.IColor;
+import com.lwjglwrapper.nanovg.NVGImage;
+import com.lwjglwrapper.utils.Utils;
+import com.lwjglwrapper.utils.colors.StaticColor;
 import com.lwjglwrapper.utils.states.State;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.joml.Rectanglef;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.nanovg.NanoVG;
 
 /**
  *
@@ -19,8 +27,17 @@ import org.lwjgl.glfw.GLFW;
  */
 public class OptionState extends State<CodingGame>{
 
+    private GaussianBlur blur;
+    private NVGImage rocket;
+    
     public OptionState(CodingGame game) {
         super(game);
+        blur = new GaussianBlur();
+        try {
+            rocket = LWJGL.graphics.createNanoVGImageFromResource(Utils.ioResourceToByteBuffer(OptionState.class.getResourceAsStream("/icons/rocket.png"), 8 * 1024), 0);
+        } catch (IOException ex) {
+            Logger.getLogger(OptionState.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
@@ -36,10 +53,12 @@ public class OptionState extends State<CodingGame>{
 
     @Override
     public void render() {
-        new RenderableTexture(new Rectanglef(0, 0, LWJGL.window.getWidth(), LWJGL.window.getHeight()), game.gs.gameTexture).render(true);
+        blur.render(game.gs.gameTexture);
+        
         LWJGL.graphics.begin();
-        LWJGL.graphics.rect(100, 200, 300, 400);
-        LWJGL.graphics.fill(IColor.RED);
+        LWJGL.graphics.image(rocket, 100, 200, 32, 32);
+        LWJGL.graphics.setUpText(GameUIHandler.textFont, StaticColor.WHITE, 32, NanoVG.NVG_ALIGN_LEFT | NanoVG.NVG_ALIGN_MIDDLE);
+        LWJGL.graphics.text("Resume", 150, 200);
         LWJGL.graphics.end();
     }
 
@@ -49,6 +68,7 @@ public class OptionState extends State<CodingGame>{
 
     @Override
     public void dispose() {
+        rocket.dispose();
     }
     
 }

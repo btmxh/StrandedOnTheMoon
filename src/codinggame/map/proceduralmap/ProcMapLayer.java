@@ -15,6 +15,7 @@ import codinggame.map.cells.DataCell;
 import codinggame.map.proceduralmap.chunkloading.ChunkLocation;
 import codinggame.map.proceduralmap.chunkloading.ChunkThread;
 import codinggame.map.structures.CrashSpaceshipStructure;
+import codinggame.map.structures.IceCometStructure;
 import com.lwjglwrapper.LWJGL;
 import java.awt.Point;
 import java.io.File;
@@ -194,8 +195,12 @@ public class ProcMapLayer implements MapLayer{
     }
 
     private void generateStructures(ProcMapChunk chunk, int chunkX, int chunkY) {
-        if(chunkX == 0 && id == GameMap.ORE_LAYER && chunkY == 0) {
+        if(id != GameMap.ORE_LAYER) return;
+        if(chunkX == 0 && chunkY == 0) {
             new CrashSpaceshipStructure(new Vector2i(5, 5), map.getTilesets()).set(this);
+        } else if(Math.random() < IceCometStructure.chance) {
+            final int HALF_CHUNK_SIZE = ProcMapChunk.CHUNK_SIZE / 2;
+            new IceCometStructure(new Vector2i((chunkX * 2 + 1) * HALF_CHUNK_SIZE, (chunkY * 2 + 1) * HALF_CHUNK_SIZE), map.getTilesets()).set(this);
         }
     }
 }

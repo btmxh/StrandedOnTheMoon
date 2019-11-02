@@ -8,6 +8,7 @@ package codinggame.handlers;
 import codinggame.CodingGame;
 import codinggame.lang.Command;
 import codinggame.lang.CommandBlock;
+import codinggame.lang.StopException;
 import codinggame.objs.robots.Robot;
 import codinggame.states.GameState;
 import codinggame.ui.codingarea.CodingFX;
@@ -47,19 +48,21 @@ public class CommandHandler {
             block.update(delta);
         }
         synchronized (commands) {
-            for (Iterator<Command> it = commands.iterator(); it.hasNext();) {
-                Command command = it.next();
+//            for (Iterator<Command> it = commands.iterator(); it.hasNext();) {
+//                Command command = it.next();
+//                if(command.isOver()) {
+//                    command.end();
+//                    it.remove();
+//                }
+//                command.update(delta);
+//            }
+            for (int i = commands.size() - 1; i >= 0; i--) {
+                Command command = commands.get(i);
                 if(command.isOver()) {
                     command.end();
-                    it.remove();
+                    commands.remove(i);
                 }
                 command.update(delta);
-            }
-        }
-        for (Iterator<Map.Entry<Robot, Thread>> it = threads.entrySet().iterator(); it.hasNext();) {
-            Map.Entry<Robot, Thread> entry = it.next();
-            if(entry.getValue().getState() == Thread.State.TERMINATED) {
-                it.remove();
             }
         }
     }
@@ -93,10 +96,14 @@ public class CommandHandler {
     
     public void throwExecutionError(Command command, String description) {
         CodingFX.currentController.println("Execution error: " + description);
-        Command.getRootCommandBlock(command).stop();
+        try {
+            Command.getRoot(command).forceStop();
+        } catch (StopException ex) {
+            command.getRobot().stopCommands();
+        }
     }
 
     public void stop(Robot currentRobot) {
-        threads.get(currentRobot).interrupt();
+        currentRobot.stopCommands();
     }
 }

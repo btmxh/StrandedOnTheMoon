@@ -9,7 +9,7 @@ import codinggame.objs.robots.FarmingRobot;
 import codinggame.objs.robots.MinerRobot;
 import codinggame.objs.robots.Robot;
 import codinggame.utils.Utils;
-import com.lwjglwrapper.utils.IColor;
+import com.lwjglwrapper.utils.colors.StaticColor;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,12 +18,12 @@ import java.util.List;
  * @author Welcome
  */
 public enum EquipmentSlot {
-    DRILL(IColor.ORANGE, MinerRobot.class), HOE(IColor.LIME, FarmingRobot.class);
+    DRILL(StaticColor.ORANGE, MinerRobot.class), HOE(StaticColor.LIME, FarmingRobot.class);
     
     private List<Class<? extends Robot>> robotTypes;
-    private IColor color;
+    private StaticColor color;
 
-    private EquipmentSlot(IColor color, Class<? extends Robot>... classes) {
+    private EquipmentSlot(StaticColor color, Class<? extends Robot>... classes) {
         this.color = color;
         this.robotTypes = Arrays.asList(classes);
     }
@@ -36,7 +36,7 @@ public enum EquipmentSlot {
         return valueOf(Utils.toVariableNameString(name));
     }
 
-    public IColor getColor() {
+    public StaticColor getColor() {
         return color;
     }
 }

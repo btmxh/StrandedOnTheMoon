@@ -53,6 +53,7 @@ public class Recipe {
     
     public boolean craft(CraftingRobot robot) {
         Inventory inv = robot.getInventory();
+        System.out.println(requirements);
         if(inv.removeAll(requirements)) {
             inv.addAll(returnItems);
             return true;

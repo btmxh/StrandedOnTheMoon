@@ -5,6 +5,7 @@
  */
 package codinggame;
 
+import aurelienribon.tweenengine.TweenManager;
 import codinggame.globjs.RenderableTexture;
 import codinggame.handlers.AudioHandler;
 import codinggame.objs.items.ItemTypes;
@@ -14,6 +15,7 @@ import codinggame.ui.codingarea.CodingFX;
 import com.lwjglwrapper.LWJGL;
 import com.lwjglwrapper.display.Window;
 import com.lwjglwrapper.utils.states.GameStateLoop;
+import com.lwjglwrapper.utils.states.State;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -29,6 +31,7 @@ public class CodingGame extends GameStateLoop {
     public GameState gs;
     public OptionState os;
     public AudioHandler audioHandler;
+    public TweenManager tweenManager;
     
     private final List<Runnable> queries = new ArrayList<>();
     
@@ -40,6 +43,7 @@ public class CodingGame extends GameStateLoop {
         super.init();
         RenderableTexture.init();
         LWJGL.currentLoop = this;
+        tweenManager = new TweenManager();
         
         gs = new GameState(this);
         os = new OptionState(this);
@@ -73,6 +77,7 @@ public class CodingGame extends GameStateLoop {
                 queries.get(0).run();
             }
         }
+        tweenManager.update(delta);
     }
     
     
@@ -116,11 +121,14 @@ public class CodingGame extends GameStateLoop {
         return gs;
     }
     
+    public OptionState getOptionState() {
+        return os;
+    }
+    
     public static CodingGame getInstance() {
         return (CodingGame) LWJGL.currentLoop;
     }
     
-    //For testing purposes
     public static void debug(Object obj) {
         CodingFX.currentController.println(obj == null?"null":obj.toString());
     }
@@ -128,5 +136,6 @@ public class CodingGame extends GameStateLoop {
     public void execInMainThread(Runnable runnable) {
         queries.add(runnable);
     }
+
 
 }

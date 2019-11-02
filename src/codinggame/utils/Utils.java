@@ -38,9 +38,11 @@ public class Utils {
         String[] ranged = Arrays.copyOfRange(strings, start, end + 1);
         return String.join(delimiter, ranged);
     }
-
-    public static void main(String[] args) {
-        Robot r = new CraftingRobot(null, null, "ds");
-        System.out.println(r.getTypeName());
+    
+    public static void random(double chance, Runnable exec) {
+        double total = 0;
+        while((total += Math.random()) < chance) {
+            exec.run();
+        }
     }
 }

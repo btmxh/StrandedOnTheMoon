@@ -9,6 +9,10 @@ import codinggame.handlers.CommandHandler;
 import codinggame.lang.Command;
 import codinggame.lang.CommandBlock;
 import codinggame.lang.Parser;
+import codinggame.lang.commands.utils.Direction;
+import codinggame.map.GameMap;
+import codinggame.map.MapCell;
+import codinggame.map.MapTile;
 import codinggame.objs.robots.Robot;
 import codinggame.states.GameState;
 import org.joml.Vector2f;
@@ -27,10 +31,10 @@ public class GoCommand extends Command{
     
     private Vector2f destination;
     
-    public GoCommand(GameState game, CommandBlock parentCommandBlock, Robot executingRobot, CommandHandler executor, Vector2i move) {
+    public GoCommand(GameState game, CommandBlock parentCommandBlock, Robot executingRobot, CommandHandler executor, int move, Direction direction) {
         super(game, parentCommandBlock, executingRobot, executor);
-        this.move = move;
-        setEnergyConsumption((int) (move.length() * 1));
+        this.move = direction.moveVector(move);
+        setEnergyConsumption(move);
     }
 
     @Override
@@ -38,7 +42,17 @@ public class GoCommand extends Command{
         super.begin();
         setMaxTime((float) move.length() / executingRobot.getSpeed());
         destination = new Vector2f(executingRobot.getPosition()).add(move.x, move.y);
-        System.out.println(destination);
+        for (int i = 0; i <= move.length(); i++) {
+            int x = (int) (executingRobot.getTileX() + i * Math.signum(move.x));
+            int y = (int) (executingRobot.getTileY() + i * Math.signum(move.y));
+            MapCell cell = game.getMapHandler().getMap().getMapLayer(GameMap.ORE_LAYER).getTileAt(x, y);
+            if(cell == null)    continue;
+            if(cell.getTileType() == null)  continue;
+            MapTile tile = cell.getTileType();
+            if(tile.isSolid()) {
+                executor.throwExecutionError(this, "The path is obstructed");
+            }
+        }
     }
 
     @Override
@@ -70,6 +84,6 @@ public class GoCommand extends Command{
         int moveX = parser.parseInt(tokens[1]);
         int moveY = parser.parseInt(tokens[2]);
         Vector2i move = new Vector2i(moveX, moveY);
-        return new GoCommand(game, parentCommandBlock, executingRobot, executor, move);
+        return new GoCommand(game, parentCommandBlock, executingRobot, executor, moveX, Direction.UP);
     }
 }

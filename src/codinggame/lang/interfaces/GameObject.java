@@ -8,6 +8,7 @@ package codinggame.lang.interfaces;
 import codinggame.CodingGame;
 import codinggame.handlers.CommandHandler;
 import codinggame.lang.CommandBlock;
+import codinggame.lang.StopException;
 import codinggame.lang.commands.WaitCommand;
 import codinggame.objs.robots.Robot;
 import codinggame.states.GameState;
@@ -22,14 +23,12 @@ import java.util.logging.Logger;
 public class GameObject {
     GameState game;
     CommandHandler executor;
-    CommandBlock currentBlock;
     Robot robot;
 
     public GameObject(GameState game, Robot robot) {
         this.game = game;
         this.robot = robot;
         this.executor = game.getCommandHandler();
-        this.currentBlock = new CommandBlock(game, currentBlock, robot, executor);
     }
     
     public void println(Object obj) {
@@ -42,7 +41,7 @@ public class GameObject {
     }
     
     public void waitFor(float time) {
-        executor.execute(new WaitCommand(game, currentBlock, robot, executor, time));
+        executor.execute(new WaitCommand(game, null, robot, executor, time));
         lock();
         testInterupt();
     }
@@ -64,7 +63,7 @@ public class GameObject {
     
     void testInterupt() {
         if(robot.stopped()) {
-            Thread.currentThread().interrupt();
+            throw new StopException();
         }
     }
 }

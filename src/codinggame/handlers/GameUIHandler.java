@@ -5,13 +5,16 @@
  */
 package codinggame.handlers;
 
+import aurelienribon.tweenengine.Tween;
+import aurelienribon.tweenengine.equations.Sine;
+import codinggame.CodingGame;
 import codinggame.handlers.MapHandler.ChooseTile;
-import codinggame.lang.JavaParser;
-import codinggame.lang.Parser;
 import codinggame.map.MapCell;
+import codinggame.map.MapTile;
 import codinggame.map.cells.FacingCell;
 import codinggame.map.cells.FacingCell.Facing;
 import codinggame.map.cells.InventoryCell;
+import codinggame.map.cells.SheetCell;
 import codinggame.objs.Battery;
 import codinggame.objs.Inventory;
 import codinggame.objs.items.Item;
@@ -31,8 +34,10 @@ import com.lwjglwrapper.display.Window;
 import com.lwjglwrapper.nanovg.NVGFont;
 import com.lwjglwrapper.nanovg.NVGGraphics;
 import com.lwjglwrapper.nanovg.NVGImage;
+import com.lwjglwrapper.nanovg.paint.ImagePaint;
 import com.lwjglwrapper.nanovg.paint.Paint;
-import com.lwjglwrapper.utils.IColor;
+import com.lwjglwrapper.nanovg.paint.types.FillPaint;
+import com.lwjglwrapper.utils.colors.StaticColor;
 import com.lwjglwrapper.utils.Utils;
 import com.lwjglwrapper.utils.floats.GLFloats;
 import com.lwjglwrapper.utils.floats.GLFloat;
@@ -46,7 +51,6 @@ import com.lwjglwrapper.utils.ui.Component;
 import com.lwjglwrapper.utils.ui.Panel;
 import com.lwjglwrapper.utils.ui.Stage;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
@@ -76,8 +80,9 @@ public class GameUIHandler {
     private IComboBox facingBox;
 
     public GameUIHandler(Window window, GameState game) {
+        Tween.registerAccessor(TabbedPanel.class, new TabbedPanel.Accessor());
         initStaticVariables();
-        textFont = LWJGL.graphics.createFont("res/ProggyClean.ttf", "ProggyClean");
+        textFont = LWJGL.graphics.createFont("res/ProggyClean.ttf", "Proggy Clean");
         stage = window.getStage();
         this.game = game;
         
@@ -94,15 +99,15 @@ public class GameUIHandler {
         Panel robotInfoBar = new Panel(stage, false);
         robotInfoBar.getShapeStates().reset()
                 .setAll(new Rect(INFO_BAR_X, INFO_BAR_Y, INFO_BAR_WIDTH, INFO_BAR_HEIGHT))
-                .setAllStrokes(IColor.BLACK)
-                .setAllFills(new IColor(0.1f))
+                .setAllStrokes(StaticColor.BLACK)
+                .setAllFills(new StaticColor(0.1f))
                 .construct(false);
         
         Component robotPanelInfo = new Component(stage, false, 1);
         robotPanelInfo.getShapeStates().setAll(Shape.EMPTY).setAllAfterPaints((g) -> {
             g.translate(INFO_BAR_X.get(), INFO_BAR_Y.get());
             Robot robot = (Robot) game.getSelectedObject();
-            g.setUpText(textFont, IColor.WHITE, 20, NanoVG.NVG_ALIGN_TOP | NanoVG.NVG_ALIGN_LEFT);
+            g.setUpText(textFont, StaticColor.WHITE, 20, NanoVG.NVG_ALIGN_TOP | NanoVG.NVG_ALIGN_LEFT);
             g.translate(0, 60);
             g.text(robot.getTypeName(), 10, 0);
             g.translate(0, 30);
@@ -128,7 +133,7 @@ public class GameUIHandler {
 
                     g.rect(0, 0, INFO_BAR_WIDTH.get(), 30);
                     g.fill(slot.getColor());
-                    g.setUpText(textFont, IColor.WHITE, 16, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
+                    g.setUpText(textFont, StaticColor.WHITE, 16, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
                     g.text(item.toString(), 10, 15);
                     g.image(item.getItemType().getNanoVGTexture(), INFO_BAR_WIDTH.get() - 30, 0, 30, 30);
                     g.translate(0, 32);
@@ -137,8 +142,8 @@ public class GameUIHandler {
                     Item item = entry.getValue();
 
                     g.rect(0, 0, INFO_BAR_WIDTH.get(), 30);
-                    g.fill(new IColor(0.2f));
-                    g.setUpText(textFont, IColor.WHITE, 16, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
+                    g.fill(new StaticColor(0.2f));
+                    g.setUpText(textFont, StaticColor.WHITE, 16, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
                     g.text(item.toString(), 10, 15);
                     g.image(item.getItemType().getNanoVGTexture(), INFO_BAR_WIDTH.get() - 30, 0, 30, 30);
                     g.translate(0, 32);
@@ -152,8 +157,8 @@ public class GameUIHandler {
                 for (Module module : robot.getInventory().getModules()) {
                     if(module == null)  continue;
                     g.rect(0, 0, INFO_BAR_WIDTH.get(), 30);
-                    g.fill(new IColor(0.2f));
-                    g.setUpText(textFont, IColor.WHITE, 16, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
+                    g.fill(new StaticColor(0.2f));
+                    g.setUpText(textFont, StaticColor.WHITE, 16, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
                     g.text(module.getName(), 10, 15);
                     g.image(module.getNanoVGTexture(), INFO_BAR_WIDTH.get() - 30, 0, 30, 30);
                     g.translate(0, 32);
@@ -165,15 +170,16 @@ public class GameUIHandler {
         facingBox = new IComboBox(stage, 40, new GLRect(()->90, ()->0, ()->100, ()->30), textFont);
         tileInfoBar.getShapeStates().reset()
                 .setAll(new Rect(GLFloats.ZERO, GLFloats.ZERO, INFO_BAR_WIDTH, INFO_BAR_HEIGHT))
-                .setAllStrokes(IColor.BLACK)
-                .setAllFills(new IColor(0.1f))
+                .setAllStrokes(StaticColor.BLACK)
+                .setAllFills(new StaticColor(0.1f))
                 .setAllBeforePaints((g) -> g.translate(INFO_BAR_X.get(), INFO_BAR_Y.get()))
                 .setAllAfterPaints((g) -> {
                     ChooseTile tile = (ChooseTile) game.getSelectedObject();
                     MapCell cell = tile.getCell();
                     if(cell == null)    return;
+                    if(cell.getTileType() == null)  return;
                     g.translate(0, 60);
-                    g.setUpText(textFont, IColor.WHITE, 20, NanoVG.NVG_ALIGN_TOP | NanoVG.NVG_ALIGN_LEFT);
+                    g.setUpText(textFont, StaticColor.WHITE, 20, NanoVG.NVG_ALIGN_TOP | NanoVG.NVG_ALIGN_LEFT);
                     g.text("Tile: " + cell.getTileType().getName(), 10, 0);
                     g.translate(0, 30);
                     g.text("Position: x=" + tile.x + " y=" + tile.y, 10, 0);
@@ -182,6 +188,14 @@ public class GameUIHandler {
                         g.text("Facing: ", 10, 5);
                         facingBox.setVisible(true);
                     } else facingBox.setVisible(false);
+                    if(cell instanceof SheetCell) {
+                        if(cell.getTileType().getID() == MapTile.POTATO_CROPS) {
+                            int idx = ((SheetCell) cell).getIndex();
+                            String representation = idx == 3? "Mature":String.valueOf(idx + 1);
+                            g.text("Growth Stage: " + representation, 10, 5);
+                            g.translate(0, 30);
+                        }
+                    }
                     //g.translate(0, 30);
                 }).construct(false);
         new IComboBox.IComboBoxCell(facingBox, "Left");
@@ -208,8 +222,8 @@ public class GameUIHandler {
                     Item item = entry.getValue();
                     
                     g.rect(0, 0, INFO_BAR_WIDTH.get(), 30);
-                    g.fill(new IColor(0.2f));
-                    g.setUpText(textFont, IColor.WHITE, 16, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
+                    g.fill(new StaticColor(0.2f));
+                    g.setUpText(textFont, StaticColor.WHITE, 16, NanoVG.NVG_ALIGN_MIDDLE | NanoVG.NVG_ALIGN_LEFT);
                     g.text(item.toString(), 10, 15);
                     g.image(item.getItemType().getNanoVGTexture(), INFO_BAR_WIDTH.get() - 30, 0, 30, 30);
                     g.translate(0, 32);
@@ -217,22 +231,43 @@ public class GameUIHandler {
             }
         };
         openCodeButton = new IButton(stage, false, new GLRect(
-                GLFloat.memValue(10), GLFloats.w_fromFarXAxis(GLFloat.memValue(310)), GLFloat.memValue(200), GLFloat.memValue(40)
-        ), new Paint[]{new IColor(0.5f), new IColor(0.6f), new IColor(0.2f)}, IColor.WHITE, IColor.WHITE);
-        //openCodeButton.setVisible(false);
+                GLFloat.memValue(10), GLFloats.w_fromFarXAxis(GLFloat.memValue(260)), GLFloat.memValue(200), GLFloat.memValue(40)
+        ), new Paint[]{new StaticColor(0.5f), new StaticColor(0.6f), new StaticColor(0.2f)}, StaticColor.WHITE, StaticColor.WHITE);
         openCodeButton.setText("Open Code");
         openCodeButton.setOnClickListener(new Button.OnClickListener() {
             private boolean opened = false;
             @Override
             public void action(Stage stage, Button comp, int mode) {
-//                opened = !opened;
-//                openCodeButton.setText(opened? "Close Code":"Open Code");
-//                codingArea.setVisible(opened);
-//                loggerArea.setVisible(opened);
                 CodingFX.show();
             }
         });
         
+        closeButton = new Button(stage, false);
+        GLRect imageBounds = new GLRect(GLFloat.add(INFO_BAR_X, GLFloat.memValue(10)), GLFloat.add(INFO_BAR_Y, GLFloat.memValue(10)), GLFloat.memValue(32), GLFloat.memValue(32));
+        GLRect bounds = new GLRect(GLFloat.add(INFO_BAR_X, GLFloat.memValue(5)), GLFloat.add(INFO_BAR_Y, GLFloat.memValue(5)), GLFloat.memValue(42), GLFloat.memValue(42));
+        final RoundRect rect = new RoundRect(bounds, GLFloat.memValue(4));
+        
+        closeButton.getShapeStates().setAll(new Rect(imageBounds, bounds))
+                .setBeforePaint(g -> new PaintedShape(rect, new StaticColor(0.1f), null).render(g), Button.NORMAL)
+                .setBeforePaint(g -> new PaintedShape(rect, new StaticColor(0.3f), null).render(g), Button.HOVER)
+                .setBeforePaint(g -> new PaintedShape(rect, StaticColor.BLACK, null).render(g), Button.CLICKED)
+                .setAllFills(new FillPaint() {
+                    @Override
+                    public void fill(long nvgID) {
+                        ImagePaint paint = LWJGL.graphics.imagePaint(closeIcon, imageBounds.getJOMLRect(), 0, 1f);
+                        paint.fill(nvgID);
+                    }
+
+                    @Override
+                    public FillPaint fmulAlpha(float alpha) {
+                        return this;
+                    }
+                })
+//                .setAllFills(StaticColor.BLUE)
+                .construct(false);
+        closeButton.setOnClickListener((Stage stage1, Button comp, int mode) -> {
+            closeInfoBar();
+        });
         
         robotInfoBar.addChild(robotPanelInfo);
         robotInfoBar.addChild(openCodeButton);
@@ -241,22 +276,9 @@ public class GameUIHandler {
         
         tileInfoBar.addChild(tileInventory);
         
-        infoBar.getPanels().addAll(Arrays.asList(robotInfoBar, tileInfoBar));
+        infoBar.getComponents().add(closeButton);
         
-        closeButton = new Button(stage, true);
-        GLRect bounds = new GLRect(GLFloat.add(INFO_BAR_X, GLFloat.memValue(10)), GLFloat.add(INFO_BAR_Y, GLFloat.memValue(10)), GLFloat.memValue(32), GLFloat.memValue(32));
-        GLRect imageBounds = new GLRect(GLFloat.add(INFO_BAR_X, GLFloat.memValue(5)), GLFloat.add(INFO_BAR_Y, GLFloat.memValue(5)), GLFloat.memValue(42), GLFloat.memValue(42));
-        RoundRect rect = new RoundRect(imageBounds, GLFloat.memValue(4));
-        closeButton.getShapeStates().setAll(new Rect(bounds, imageBounds))
-                .setBeforePaint(g -> new PaintedShape(rect, new IColor(0.1f), null).render(g), Button.NORMAL)
-                .setBeforePaint(g -> new PaintedShape(rect, new IColor(0.3f), null).render(g), Button.HOVER)
-                .setBeforePaint(g -> new PaintedShape(rect, IColor.BLACK, null).render(g), Button.CLICKED)
-                .setAllFills((id) -> LWJGL.graphics.imagePaint(closeIcon, bounds.getJOMLRect(), 0, 1).fill(id))
-                .construct(false);
-        closeButton.setOnClickListener((Stage stage1, Button comp, int mode) -> {
-            closeInfoBar();
-        });
-                
+        infoBar.getPanels().addAll(Arrays.asList(robotInfoBar, tileInfoBar));  
     }
     
     public void tick(InputProcessor processor) {
@@ -278,10 +300,13 @@ public class GameUIHandler {
             }
         }
         closeButton.setVisible(infoBar.getSelectedIndex() >= 0);
-//        g.image(ItemTypes.COPPER_ORE.getNanoVGTexture(), 40, 40, 128, 128, IColor.RED);
-        g.setUpText(textFont, IColor.WHITE, 24, NanoVG.NVG_ALIGN_TOP | NanoVG.NVG_ALIGN_LEFT);
+//        g.image(ItemTypes.COPPER_ORE.getNanoVGTexture(), 40, 40, 128, 128, StaticColor.RED);
+        g.setUpText(textFont, StaticColor.WHITE, 24, NanoVG.NVG_ALIGN_TOP | NanoVG.NVG_ALIGN_LEFT);
         g.text(game.getClock().getDisplayTime(), 10, 10);
         g.text(game.getInputProcessor().toString(), 10, 40);
+        g.text(infoBar.dx + "", 10, 70);
+        g.text(infoBar.getSelectedIndex() + "", 10, 100);
+        
         stage.render();
     }
     
@@ -313,12 +338,27 @@ public class GameUIHandler {
         return infoBarBounds.contains(LWJGL.mouse.getCursorPosition());
     }
     
-    public void closeInfoBar() {
-        game.select(null);
-        game.setProcessor(InputProcessor.GAME);
-    }
-    
     public void dispose() {
         closeIcon.dispose();
+    }
+
+    public boolean infoBarVisible() {
+        return infoBar.getSelectedIndex() >= 0;
+    }
+    
+    public void showInfoBar(int idx) {
+        if(infoBarVisible())    return;
+        infoBar.select(idx);
+        Tween.to(infoBar, TabbedPanel.Accessor.FADE, 0.5f).target(1).ease(Sine.OUT).start(CodingGame.getInstance().tweenManager);
+        Tween.to(infoBar, TabbedPanel.Accessor.MOVE, 0.25f).target(0).ease(Sine.IN).start(CodingGame.getInstance().tweenManager);
+    }
+    
+    public void closeInfoBar() {
+        Tween.to(infoBar, TabbedPanel.Accessor.FADE, 0.25f).target(0).ease(Sine.OUT).start(CodingGame.getInstance().tweenManager);
+        Tween.to(infoBar, TabbedPanel.Accessor.MOVE, 0.5f).target(INFO_BAR_X.get()).ease(Sine.IN).start(CodingGame.getInstance().tweenManager).setCallback((type, source) -> {
+            infoBar.select(-1);
+            game.select(null);
+            game.setProcessor(InputProcessor.GAME);
+        });
     }
 }

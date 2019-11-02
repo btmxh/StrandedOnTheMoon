@@ -5,6 +5,7 @@
  */
 package codinggame.objs.crafting;
 
+import codinggame.objs.items.CountItem;
 import codinggame.objs.items.Item;
 import codinggame.objs.items.ItemType;
 import codinggame.objs.items.ItemTypes;
@@ -22,11 +23,10 @@ public class Recipes {
     
     static {
         recipes = new ArrayList<>();
-        add(new Recipe().setRequirements(
-            new MassItem(ItemTypes.COPPER_ORE, 10)
-        ).setReturnItems(
-            new Drill(ItemTypes.COPPER_DRILL)
-        ));
+        add(new Recipe().setRequirements(new MassItem(ItemTypes.COPPER_ORE, 10)).setReturnItems(new Drill(ItemTypes.COPPER_DRILL)));
+        add(new Recipe().setRequirements(new CountItem(ItemTypes.POTATO, 2)).setReturnItems(new CountItem(ItemTypes.POTATO_CAN, 1)));
+        add(new Recipe().setRequirements(new MassItem(ItemTypes.IRON_ORE, 5f)).setReturnItems(new CountItem(ItemTypes.BUCKET, 1)));
+        add(new Recipe().setRequirements(new CountItem(ItemTypes.BUCKET, 1), new MassItem(ItemTypes.ICE, 3f)).setReturnItems(new CountItem(ItemTypes.WATER_BUCKET, 1)));
     }
     
     public static void add(Recipe recipe) {

@@ -7,9 +7,7 @@ package codinggame.map.proceduralmap;
 
 import codinggame.map.GameMap;
 import codinggame.map.MapTile;
-import codinggame.map.structures.CrashSpaceshipStructure;
 import com.lwjglwrapper.utils.OpenSimplexNoise;
-import org.joml.Vector2i;
 
 /**
  *
@@ -20,7 +18,7 @@ public class ChunkGenerator {
     private final long seed;
     private final OpenSimplexNoise noise;
     
-    public static final double VEIN_SIZE = 0.3, ROCK = -0.6, COPPER = -0.7;
+    public static final double VEIN_SIZE = 0.3, ROCK = -0.6, COPPER = -0.7, IRON = -0.75;
 
     public ChunkGenerator(long seed) {
         this.seed = seed;
@@ -41,7 +39,9 @@ public class ChunkGenerator {
                     int tileX = chunkX * ProcMapChunk.CHUNK_SIZE + x;
                     int tileY = chunkY * ProcMapChunk.CHUNK_SIZE + y;
                     double noiseValue = noise.eval(tileX * VEIN_SIZE, tileY * VEIN_SIZE);
-                    if(noiseValue < COPPER) {
+                    if(noiseValue < IRON) {
+                        chunk.setTileAt(x, y, map.getTileset().getTile(MapTile.IRON_ORE));
+                    } else if(noiseValue < COPPER) {
                         chunk.setTileAt(x, y, map.getTileset().getTile(MapTile.COPPER_ORE));
                     } else if(noiseValue < ROCK) {
                         chunk.setTileAt(x, y, map.getTileset().getTile(MapTile.MOON_ROCK));

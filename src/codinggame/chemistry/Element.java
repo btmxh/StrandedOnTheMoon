@@ -5,6 +5,7 @@
  */
 package codinggame.chemistry;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,8 +45,7 @@ public enum Element {
     Cu("Copper", 63.546f, 1.9f),
     Zn("Zinc", 65.39f, 1.65f),
     Ga("Gallium", 69.723f, 1.81f),
-    Ge("Germanium",
-            72.61f, 2.01f), As("Arsenic", 74.9216f, 2.18f), Se("Selenium",
+    Ge("Germanium", 72.61f, 2.01f), As("Arsenic", 74.9216f, 2.18f), Se("Selenium",
             78.96f, 2.55f), Br("Bromine", 79.904f, 2.96f), Kr("Krypton", 83.8f,
             0), Rb("Rubidium", 85.4678f, 0.82f), Sr("Strontium", 87.62f, 0.95f), Y(
             "Yttrium", 88.9059f, 1.22f), Zr("Zirconium", 91.224f, 1.33f), Nb(

@@ -6,16 +6,24 @@
 package codinggame.objs.items.equipments;
 
 import codinggame.objs.items.CountItem;
+import codinggame.objs.items.equipments.Hoe.Type;
 
 /**
  *
  * @author Welcome
  */
-public class Hoe extends CountItem<Hoe.Type>{
+public class Hoe extends CountItem<Type>{
 
     public Hoe(Type itemType) {
         super(itemType, 1);
     }
+
+    @Override
+    public Hoe clone() {
+        return new Hoe(getItemType());
+    }
+    
+    
     
     public static class Type extends Equipment{
         
@@ -29,8 +37,6 @@ public class Hoe extends CountItem<Hoe.Type>{
         public float getSpeed() {
             return speed;
         }
-        
-        
         
     }
 }

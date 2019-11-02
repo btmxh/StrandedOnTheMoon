@@ -24,6 +24,7 @@ public class CodingFX extends Application{
     public static CodingFX currentApp;
     public static Stage currentStage;
     public static WindowController currentController;
+    public static Scene currentScene;
     
     @Override
     public void start(Stage stage) throws Exception {
@@ -40,11 +41,12 @@ public class CodingFX extends Application{
         currentApp = this;
         currentStage = stage;
         currentController = loader.getController();
+        currentScene = scene;
+        
+        currentController.after_load_init();
         
         stage.setTitle("Code Editor");
         stage.setAlwaysOnTop(true);
-        stage.show();
-        stage.hide();
     }
     
     public static void initApp() {

@@ -5,6 +5,7 @@
  */
 package codinggame.map;
 
+import codinggame.map.tiles.MapTiles;
 import com.lwjglwrapper.opengl.objects.Texture2D;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,7 +17,8 @@ import java.io.Serializable;
  * @author Welcome
  */
 public class MapTile implements Serializable{
-    public static final int MOON_TURF = 2, COPPER_ORE = 1, CHARGER = 3, BARRIER = 4, STORAGE_CELL = 5, MOON_ROCK = 6, CENTRAL_STORAGE_UNIT = 7, CHEMICAL_PROCESSOR = 8, CONVEYOR = 9, GLASS = 10, SOIL = 11, WHEAT_CROPS = 12;
+    public static final int MOON_TURF = 2, COPPER_ORE = 1, CHARGER = 3, BARRIER = 4, STORAGE_CELL = 5, MOON_ROCK = 6, CENTRAL_STORAGE_UNIT = 7, CHEMICAL_PROCESSOR = 8, CONVEYOR = 9, GLASS = 10, SOIL = 11, POTATO_CROPS = 12, ICE = 13, IRON_ORE = 14;
+    public static final int LAST = IRON_ORE;
     
     private int id;
     private transient Texture2D texture;
@@ -24,6 +26,7 @@ public class MapTile implements Serializable{
     public MapTile(int id, Texture2D texture) {
         this.id = id;
         this.texture = texture;
+        if(texture == null) throw new IllegalArgumentException("texture == null");
     }
     
     public int getID() {
@@ -35,18 +38,10 @@ public class MapTile implements Serializable{
     }
 
     public String getName() {
-        switch (id) {
-            case BARRIER: return "Barrier";
-            case CENTRAL_STORAGE_UNIT: return "Central Storage Unit";
-            case CHARGER: return "Charger";
-            case CHEMICAL_PROCESSOR: return "Chemical Processor";
-            case CONVEYOR: return "Conveyor";
-            case COPPER_ORE: return "Copper Ore";
-            case MOON_ROCK: return "Moon Rock";
-            case MOON_TURF: return "Moon Turf";
-            case STORAGE_CELL: return "Storage Cell";
-            case GLASS: return "Glass";
-            default: return "";
-        }
+        return MapTiles.get(id).getName();
+    }
+
+    public boolean isSolid() {
+        return MapTiles.get(id).isSolid();
     }
 }
