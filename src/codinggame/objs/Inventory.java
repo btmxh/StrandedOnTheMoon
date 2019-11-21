@@ -12,7 +12,9 @@ import codinggame.objs.items.ItemTypes;
 import codinggame.objs.items.MassItem;
 import codinggame.states.GameState;
 import codinggame.utils.ArrayMap;
+import codinggame.utils.ByteArray;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +24,7 @@ import javafx.util.Pair;
  *
  * @author Welcome
  */
-public class Inventory implements Serializable{
+public class Inventory {
     protected ArrayMap<ItemType, Item> items;
     protected double maxCapacity;
     protected double currentMass;
@@ -191,5 +193,12 @@ public class Inventory implements Serializable{
             clone.items.put(key, value.clone());
         }
         return clone;
+    }
+
+    public int stride() {
+        return 0;
+    }
+
+    public void writeTo(byte[] arr) {
     }
 }

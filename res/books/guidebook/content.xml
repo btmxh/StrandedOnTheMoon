@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?> 
+
+<book>
+	<resource_path>res</resource_path>
+	<cover>Game Guidebook</cover>
+	<chapter no="1" title="Introduction">
+		<mission>
+			<title>Plot</title>
+			<content>On 20/7/2069, we celebrated the 100 year anniversary of the first landing on the moon by sending a spaceship there.\nYou were one of the astronaut sended there. Unfortunately, the spaceship encounter an error and crashed into the Moon.\nWhen the error is phathien-ed, you quickly got into a lifepod and landed on the moon.\nhtbd was broken, so you cannot communicate with anyone. \nLuckily, NASA had anticipated the problem, so they had prepared for us some things to survival on the Moon.\nYou had exported the robots out of the spaceship to examine the Moon’s surface.\nBut that is not all what they can do, they can mine ores, do the gardening and other tasks.\nIn order to survive on the Moon, you must program the robots to do some specific tasks for you.\nThis book will guide you how to program those robots so that you can survive on the Moon.</content>
+		</mission>
+		
+		<mission>
+			<title>Camera</title>
+			<content>The lifepod is equipped with a radar, that could scan the terrain of the moon, and generate a 3D scene of the moon.\nThe radar can also scan moon rock, moon ores, and even your robots. However, the radar has a scan radius of about 500 meters.\nYou can navigate around the 3D scene by controlling the camera. \nScroll up/down to zoom in/out.\nDrag the LMB to rotate around the scene.\nDrag the RMB to move around the scene.</content>
+		</mission>
+		
+		<mission>
+			<title>Start Coding</title>
+			<content>In order to start programming your robot, you have to know a little bit about the code.\nTo open the code editor, you have to click on the robot in the 3D scene. You will see a bar faded in and in the bottom of it, there is a "Open Code" button. You just have to click on it, and the code editor window will appear.\nIn your window, there has been some code already. We will explain what it mean in a later mission, all you need to know is that you have to code between two curly brackets. Type "println("Hello, World!");" there and run your program by click on the left-bottom button in your window. You will see a line "Hello, World" in the output area. You have just written a Hello World program for the robot, the most simplest program.\nCode Explanation: "println" is short for "Print Line", and whatever you put between the double-quotes in the parentheses will be print on the output screen.</content>
+			<description>To complete the mission, you just have to make the program print "Hello, World!".</description>
+			<requirement>$output == "Hello, World!"</requirement>
+		</mission>
+	</chapter>
+</book>

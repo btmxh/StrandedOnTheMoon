@@ -11,6 +11,7 @@ import codinggame.objs.items.ItemTypes;
 import codinggame.objs.items.equipments.EquipmentSlot;
 import codinggame.objs.modules.Module;
 import codinggame.states.GameState;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -20,7 +21,7 @@ import javafx.util.Pair;
  *
  * @author Welcome
  */
-public class RobotInventory extends Inventory{
+public class RobotInventory extends Inventory implements Serializable{
     
     public static final int MODULES = 5;
     

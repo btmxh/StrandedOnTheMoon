@@ -33,8 +33,8 @@ public class IceCometStructure extends Structure{
                 if(x*x + y*y > RADIUS * RADIUS) continue;
                 double rand = Math.random();
                 if(rand > 0.4)  continue;
-                if(rand > 0.7)  map.put(new Point(x, y), new ProcMapCell(tileset.getTileByID(MapTile.MOON_ROCK)));
-                else map.put(new Point(x, y), new ProcMapCell(tileset.getTileByID(MapTile.ICE)));
+                if(rand > 0.7)  map.put(new Point(x, y), ProcMapCell.createCell(MapTile.MOON_ROCK));
+                else map.put(new Point(x, y), ProcMapCell.createCell(MapTile.ICE));
             }
         }
         return map;

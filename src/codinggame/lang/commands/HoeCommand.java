@@ -43,10 +43,10 @@ public class HoeCommand extends Command{
     public void end() {
         MapLayer layer = game.getMapHandler().getMap().getMapLayer(GameMap.TURF_LAYER);
         MapCell cell = layer.getTileAt(executingRobot.getTileX(), executingRobot.getTileY());
-        if(cell == null? true:cell.getTileType() == null? true:cell.getTileType().getID() != MapTile.MOON_TURF) {
+        if(cell == null? true:cell.getTileID() == -1? true : cell.getTileID() != MapTile.MOON_TURF) {
             executor.throwExecutionError(this, "This tile is not ploughable");
         } else {
-            cell.setTileType(game.getMapHandler().getMap().getTilesets().getTileByID(MapTile.SOIL));
+            layer.setTileAt(executingRobot.getTileX(), executingRobot.getTileY(), MapTile.SOIL);
             super.end();
         }
     }

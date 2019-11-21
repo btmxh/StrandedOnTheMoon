@@ -9,15 +9,15 @@ import codinggame.handlers.CommandHandler;
 import codinggame.lang.Command;
 import codinggame.lang.CommandBlock;
 import codinggame.map.GameMap;
-import codinggame.map.MapCell;
+import codinggame.map.MapLayer;
 import codinggame.map.MapTile;
-import codinggame.map.cells.SheetCell;
+import codinggame.map.proceduralmap.ProcMapLayer;
+import codinggame.map.proceduralmap.entities.EntityData;
+import codinggame.map.tiles.MapTiles;
 import codinggame.objs.items.CountItem;
-import codinggame.objs.items.Item;
 import codinggame.objs.items.ItemTypes;
 import codinggame.objs.robots.Robot;
 import codinggame.states.GameState;
-import java.util.List;
 
 /**
  *
@@ -35,21 +35,25 @@ public class HarvestCommand extends Command{
     public void end() {
         int x = executingRobot.getTileX();
         int y = executingRobot.getTileY();
-        MapCell cell = game.getMapHandler().getMap().getMapLayer(GameMap.ORE_LAYER).getTileAt(x, y);
-        if(cell == null? true:cell.getTileType()==null) {
+        MapLayer layer = game.getMapHandler().getMap().getMapLayer(GameMap.TURF_LAYER);
+        if(!(layer instanceof ProcMapLayer))    throw new UnsupportedOperationException();
+        ProcMapLayer turfLayer = (ProcMapLayer) layer;
+        EntityData data = turfLayer.getEntityAt(x, y);
+        if(data == null? true:!data.isTileEntity()) {
             executor.throwExecutionError(this, "Can not harvest!");
             return;
-        } else {
-            String tileName = cell.getTileType().getName();
-            if(cell.getTileType().getID() == MapTile.POTATO_CROPS && ((SheetCell) cell).getIndex() == 3) {
-                if(executingRobot.getInventory().add(new CountItem(ItemTypes.POTATO, 1))) {
-                    game.getMapHandler().getMap().getMapLayer(GameMap.ORE_LAYER).setTileAt(x, y, (MapTile) null);
-                } else {
-                    executor.throwExecutionError(this, "Not enough storage");
-                }
+        }
+        String tileName = MapTiles.get(data.getTileID()).getName();
+        if(data.getTileID() == MapTile.POTATO_CROPS && data.getTagID() == 3) {
+            if(executingRobot.getInventory().add(new CountItem(ItemTypes.POTATO, 1))) {
+                turfLayer.setTileEntityAt(x, y, null, null);
             } else {
-                executor.throwExecutionError(this, tileName + " is not harvestable");
+                executor.throwExecutionError(this, "Not enough storage");
+                return;
             }
+        } else {
+            executor.throwExecutionError(this, tileName + " is not harvestable");
+            return;
         }
         super.end();
     }

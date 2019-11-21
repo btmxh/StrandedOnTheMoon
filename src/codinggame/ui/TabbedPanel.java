@@ -27,7 +27,7 @@ public class TabbedPanel extends ComponentCollection{
     
     private List<Panel> panels;
     private List<Component> components;
-    private int selected = 0;
+    private int selected = -1;
 
     public TabbedPanel(Stage stage, boolean autoAdd) {
         super(stage, autoAdd, 1);

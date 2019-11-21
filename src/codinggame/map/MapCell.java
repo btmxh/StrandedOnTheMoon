@@ -5,21 +5,27 @@
  */
 package codinggame.map;
 
-import codinggame.map.tiledmap.*;
-import com.lwjglwrapper.utils.math.MathUtils;
+import codinggame.handlers.ObjectChooseHandler;
 
 /**
  *
  * @author Welcome
  */
-public interface MapCell {
+public interface MapCell extends ObjectChooseHandler.Choosable{
 
-    public MapTile getTileType();
-    public void setTileType(MapTile tile);
-    public MapCell clone();
-    public void updateSavedData(MapTilesets tilesets);
+    public static boolean nullCheck(MapCell cell) {
+        return cell != null? cell.getTileID() != -1:false;
+    }
+
+    public int getTileID();
     public int getBreakingStage();
     public void increaseBreakingProgress(float deltabp);
     public boolean isBreaking();
+    
+    public default MapTile getTileType(MapTileset tileset) {
+        int id;
+        if((id = getTileID()) == -1)   return null;
+        return tileset.getTile(id);
+    }
     
 }

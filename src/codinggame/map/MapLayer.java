@@ -13,7 +13,7 @@ import codinggame.map.tiledmap.*;
  */
 public interface MapLayer {
 
-    public void setTileAt(int x, int y, MapTile tile);
+    public void setTileAt(int x, int y, int tileID);
     public void setTileAt(int x, int y, MapCell cell);
     public MapCell getTileAt(int x, int y);
     void setID(int id);

@@ -6,6 +6,7 @@
 package codinggame.map;
 
 import codinggame.map.tiledmap.*;
+import codinggame.utils.textures.PackedTexture;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,7 +17,7 @@ import java.util.Map;
 public class MapTileset {
     
     private Map<Integer, MapTile> tiles = new HashMap<>();
-
+    
     public MapTileset() {
     }
     
@@ -30,5 +31,13 @@ public class MapTileset {
 
     public boolean containsTile(int id) {
         return tiles.containsKey(id);
+    }
+    
+    public int getTileCount() {
+        return tiles.size();
+    }
+
+    public Map<Integer, MapTile> getTiles() {
+        return tiles;
     }
 }

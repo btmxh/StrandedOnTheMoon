@@ -83,4 +83,8 @@ public class RenderableTexture {
         texture.unbind();
         shader.unbind();
     }
+
+    public void setTexture(Texture2D texture) {
+        this.texture = texture;
+    }
 }

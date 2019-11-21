@@ -10,10 +10,10 @@ import codinggame.lang.Command;
 import codinggame.lang.CommandBlock;
 import codinggame.map.GameMap;
 import codinggame.map.MapCell;
-import codinggame.map.MapLayer;
 import codinggame.map.MapTile;
 import codinggame.map.MapTilesets;
-import codinggame.map.cells.SheetCell;
+import codinggame.map.proceduralmap.ProcMapCell;
+import codinggame.map.proceduralmap.ProcMapLayer;
 import codinggame.objs.items.CountItem;
 import codinggame.objs.items.Item;
 import codinggame.objs.items.ItemType;
@@ -45,7 +45,6 @@ public class PlantCommand extends Command{
     
     @Override
     public void end() {
-            System.out.println(executor);
         Item item = executingRobot.getInventory().getItems().get(ItemTypes.POTATO_SEED_BAG);
         if(item == null)    executor.throwExecutionError(this, "Item not found");
         else {
@@ -53,13 +52,12 @@ public class PlantCommand extends Command{
             if(citem.getAmount() < 1)   executor.throwExecutionError(this, "Item not found");
             citem.setAmount(citem.getAmount() - 1);
         }
-        MapLayer turfLayer = game.getMapHandler().getMap().getMapLayer(GameMap.TURF_LAYER);
-        MapLayer oreLayer = game.getMapHandler().getMap().getMapLayer(GameMap.ORE_LAYER);
+        ProcMapLayer turfLayer = (ProcMapLayer) game.getMapHandler().getMap().getMapLayer(GameMap.TURF_LAYER);
         MapCell cell = turfLayer.getTileAt(executingRobot.getTileX(), executingRobot.getTileY());
-        if(cell == null? true:cell.getTileType() == null? true:cell.getTileType().getID() != MapTile.SOIL) {
+        if(cell == null? true:cell.getTileID() == -1? true : cell.getTileID() != MapTile.SOIL) {
             executor.throwExecutionError(this, "This tile must be a soil tile to plant seeds");
         } else {
-            oreLayer.setTileAt(executingRobot.getTileX(), executingRobot.getTileY(), seedCell);
+            turfLayer.setTileEntityAt(executingRobot.getTileX(), executingRobot.getTileY(), seedCell, null);
             super.end();
         }
     }
@@ -77,7 +75,7 @@ public class PlantCommand extends Command{
     }
 
     private MapCell seedCell(ItemType seed, MapTilesets tileset) {
-        if(seed == ItemTypes.POTATO_SEED_BAG)    return new SheetCell(tileset.getTileByID(MapTile.POTATO_CROPS), 0);
+        if(seed == ItemTypes.POTATO_SEED_BAG)    return ProcMapCell.createCell(MapTile.POTATO_CROPS);
         else return null;
     }
     

@@ -6,10 +6,9 @@
 package codinggame.map.proceduralmap;
 
 import codinggame.CodingGame;
+import static codinggame.handlers.ObjectChooseHandler.ChoosingObject.tile;
 import codinggame.map.MapTile;
-import codinggame.map.MapTilesets;
-import codinggame.map.cells.DataCell;
-import com.lwjglwrapper.LWJGL;
+import codinggame.map.proceduralmap.entities.EntityData;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -29,25 +28,25 @@ public class ProcMapChunk {
     public static final int CHUNK_SIZE = 16;
     
     private ProcMapCell[][] map;
-    private Map<Point, DataCell> dataCells;
+    private Map<Point, EntityData> entities;
     long lastFrameUsed;
+    private Listener listener = (x, y, o, n) -> {};
+    
 
     public ProcMapChunk() {
         map = new ProcMapCell[CHUNK_SIZE][CHUNK_SIZE];
         lastFrameUsed = CodingGame.getInstance().getFrameID();
-        dataCells = new HashMap<>();
+        entities = new HashMap<>();
     }
 
-    public void setTileAt(int x, int y, MapTile tile) {
-        setTileAt(x, y, new ProcMapCell(tile));
+    public void setTileAt(int x, int y, int tileID) {
+        setTileAt(x, y, ProcMapCell.createCell(tileID));
     }
     
     public void setTileAt(int x, int y, ProcMapCell cell) {
         if(x < 0 | x >= CHUNK_SIZE | y < 0 | y >= CHUNK_SIZE)    return;
+        listener.changed(x, y, map[x][y], cell);
         map[x][y] = cell;
-        if(cell instanceof DataCell) {
-            dataCells.put(new Point(x, y), (DataCell) cell);
-        }
     }
     
     public ProcMapCell getTileAt(int x, int y) {
@@ -59,57 +58,47 @@ public class ProcMapChunk {
     public String toString() {
         return Arrays.deepToString(map);
     }
-
-    void println() {
-        for (int y = 0; y < CHUNK_SIZE; y++) {
-            for (int x = 0; x < CHUNK_SIZE; x++) {
-                System.out.print(getTileAt(x, y).getTileType() + " ");
-            }
-            System.out.println();
-        }
-    }
-
-    void renderAsImage(String path) {
-        BufferedImage image = new BufferedImage(CHUNK_SIZE, CHUNK_SIZE, BufferedImage.TYPE_3BYTE_BGR);
-        for (int x = 0; x < CHUNK_SIZE; x++) {
-            for (int y = 0; y < CHUNK_SIZE; y++) {
-                image.setRGB(x, y, 0);
-                ProcMapCell cell = getTileAt(x, y);
-                if(cell != null? cell.getTileType() != null:false) {
-                    image.setRGB(x, y, cell.getTileType().getID() * 4554);
-                }
-            }
-        }
-        try {
-            ImageIO.write(image, "png", new File(path));
-        } catch (IOException ex) {
-            Logger.getLogger(ProcMapChunk.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
     
     public ProcMapCell[][] getMap() {
         return map;
     }
-
-    public Map<Point, DataCell> getDataCells() {
-        return dataCells;
-    }
     
-    public void setDataCells(Map<Point, DataCell> dataCells, MapTilesets tilesets) {
-        for (Point pt : dataCells.keySet()) {
-            ProcMapCell cell = getTileAt(pt.x, pt.y);
-            if(cell != null? cell.getTileType() != null:false) {    
-                dataCells.get(pt).setTileType(cell.getTileType());
-            }
-            dataCells.get(pt).updateSavedData(tilesets);
-            setTileAt(pt.x, pt.y, dataCells.get(pt));
-        }
+    public void setListener(Listener listener) {
+        if(listener == null)    listener = (x, y, o, n) -> {};
+        this.listener = listener;
     }
 
-    public void putDataCell(int x, int y, DataCell dataCell) {
-        dataCells.put(new Point(x, y), dataCell);
+    public EntityData getEntityAt(int tileX, int tileY) {
+        return entities.get(new Point(tileX, tileY));
+    }
+
+    public void setEntityAt(int tileX, int tileY, EntityData data) {
+        if(data == null)    entities.remove(new Point(tileX, tileY));
+        else entities.put(new Point(tileX, tileY), data);
+    }
+
+    public Listener getListener() {
+        return listener;
     }
     
-    
+    @FunctionalInterface
+    public interface Listener {
+        public void changed(int x, int y, ProcMapCell oldValue, ProcMapCell newValue);
+    }
+
+    /**
+     * @return the entities
+     */
+    public Map<Point, EntityData> getEntities() {
+        return entities;
+    }
+
+    /**
+     * @param entities the entities to set
+     */
+    public void setEntities(
+            Map<Point, EntityData> entities) {
+        this.entities = entities;
+    }
     
 }

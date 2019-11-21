@@ -28,12 +28,10 @@ public class Parser {
         this.game = game;
     }
     
-    public CommandBlock parse(String[] commands) {
+    public CommandBlock parse(String[] commands, Robot robot) {
         processingFailed = false;
-        
-        Robot executingRobot = game.getRobotHandler().getCurrentRobot();
                 
-        CommandBlock masterBlock = new CommandBlock(game, null, executingRobot, game.getCommandHandler());
+        CommandBlock masterBlock = new CommandBlock(game, null, robot, game.getCommandHandler());
         CommandBlock currentBlock = masterBlock;
         for (processingLineIndex = 0; processingLineIndex < commands.length; processingLineIndex++) {
             String command = commands[processingLineIndex].trim();
@@ -42,7 +40,7 @@ public class Parser {
                 currentBlock = currentBlock.parentCommandBlock;
                 continue;
             }
-            Command currentCommand = Command.parse(this, currentBlock, executingRobot, command, game.getCommandHandler());
+            Command currentCommand = Command.parse(this, currentBlock, robot, command, game.getCommandHandler());
             currentBlock.addCommand(currentCommand);
             if(command.endsWith("{")) {
                 if(currentCommand instanceof CommandBlock) {
@@ -63,9 +61,9 @@ public class Parser {
         return masterBlock;
     }
     
-    public CommandBlock parse(String block) {
+    public CommandBlock parse(String block, Robot robot) {
         //System.out.println(processingFailed);
-        return parse(block.split("\n"));
+        return parse(block.split("\n"), robot);
     }
     
     public int parseInt(String string) {

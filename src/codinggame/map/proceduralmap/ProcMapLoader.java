@@ -11,25 +11,17 @@ import codinggame.map.MapTile;
 import codinggame.map.MapTileSheet;
 import codinggame.map.MapTileset;
 import codinggame.map.MapTilesets;
-import codinggame.map.cells.DataCell;
 import codinggame.objs.Clock;
-import codinggame.utils.Point3i;
 import com.lwjglwrapper.opengl.objects.Texture2D;
 import com.lwjglwrapper.opengl.objects.TextureData;
-import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.lwjgl.opengl.GL11;
 
 /**
@@ -46,6 +38,7 @@ public class ProcMapLoader {
         long seed = Long.parseLong(lines.get(0));
         long gameTime = Long.parseLong(lines.get(1));
         if(clock != null)   clock.setSavedTime(gameTime);
+        System.out.println(gameTime);
         
         File tilesetFile = new File(mapDirectory + "/tileset.tst");
         MapTileset tileset = new MapTileset();
@@ -75,7 +68,6 @@ public class ProcMapLoader {
                     }
                 }));
             } else {
-                System.out.println(path);
                 tileset.addTile(new MapTile(id, new Texture2D(TextureData.fromResource(ProcMapLoader.class, path)){
                     @Override
                     public void configTexture(int id) {
@@ -90,7 +82,6 @@ public class ProcMapLoader {
         MapLayers layers = new MapLayers();
         ProcMap map = new ProcMap(mapDirectory, seed, new MapTilesets(new MapTileset[]{tileset}), layers);
         layers.add(new ProcMapLayer(map, GameMap.TURF_LAYER));
-        layers.add(new ProcMapLayer(map, GameMap.ORE_LAYER));
         
         return map;
     }

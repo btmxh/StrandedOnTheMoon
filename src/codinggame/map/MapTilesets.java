@@ -5,6 +5,11 @@
  */
 package codinggame.map;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /**
  *
  * @author Welcome
@@ -22,5 +27,9 @@ public class MapTilesets {
             return (T) tileset.getTile(id);
         }
         return null;
+    }
+
+    public Map<Integer, MapTile> getTiles() {
+        return Stream.of(tilesets).map(MapTileset::getTiles).map(Map::entrySet).flatMap(Set::stream).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

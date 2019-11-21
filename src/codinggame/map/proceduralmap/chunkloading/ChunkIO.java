@@ -5,25 +5,25 @@
  */
 package codinggame.map.proceduralmap.chunkloading;
 
-import codinggame.map.MapTile;
+import codinggame.map.MapCell;
 import codinggame.map.MapTileset;
-import codinggame.map.MapTilesets;
-import codinggame.map.cells.DataCell;
 import codinggame.map.proceduralmap.ProcMapCell;
 import codinggame.map.proceduralmap.ProcMapChunk;
+import codinggame.map.proceduralmap.entities.EntityData;
+import codinggame.map.proceduralmap.entities.EntityLoader;
+import codinggame.utils.ByteArray;
+import codinggame.utils.ChannelUtils;
 import java.awt.Point;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.nio.channels.FileChannel;
+import java.nio.file.StandardOpenOption;
+import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import org.joml.Vector2i;
 
 /**
  *
@@ -33,29 +33,32 @@ public class ChunkIO {
     
     public static ProcMapChunk loadChunk(String path, MapTileset tileset) throws IOException {
         File chunkFile = new File(path);
-        File chunkDataFile = new File(path + "d");
+        File chunkEntityFile = new File(path + "e");
         if(chunkFile.exists()) {
-            DataInputStream dis = new DataInputStream(new FileInputStream(chunkFile));
+            FileInputStream inputStream = new FileInputStream(chunkFile);
+            FileChannel channel = inputStream.getChannel();
             int length = ProcMapChunk.CHUNK_SIZE * ProcMapChunk.CHUNK_SIZE;
             ProcMapChunk chunk = new ProcMapChunk();
             for (int i = 0; i < length; i++) {
-                int y = i / ProcMapChunk.CHUNK_SIZE;
-                int x = i % ProcMapChunk.CHUNK_SIZE;
-                chunk.setTileAt(x, y, tileset.getTile(dis.readInt()));
-            }
-            dis.close();
-            
-            if(chunkDataFile.exists()) {
-                ObjectInputStream ois = new ObjectInputStream(new FileInputStream(chunkDataFile));
-                try {
-                    Object obj = ois.readObject();
-                    if(obj != null) {
-                        chunk.setDataCells((Map<Point, DataCell>) obj, new MapTilesets(new MapTileset[]{tileset}));
-                    }
-                } catch (Exception ex) {
-                    Logger.getLogger(ChunkIO.class.getName()).log(Level.SEVERE, null, ex);
+                int x = i / ProcMapChunk.CHUNK_SIZE;
+                int y = i % ProcMapChunk.CHUNK_SIZE;
+                int stride = ChannelUtils.readInt(channel);
+                if(stride == 0) chunk.setTileAt(x, y, null);
+                else {
+                    byte[] arr = ChannelUtils.read_arr(channel, stride);
+                    chunk.setTileAt(x, y, new ProcMapCell(arr, stride));
                 }
-                ois.close();
+            }
+            inputStream.close();
+            
+            if(chunkEntityFile.exists()) {
+                List<EntityData> entities = EntityLoader.loadEntities(chunkEntityFile);
+                Function<EntityData, Point> keyMapper = (data) -> {
+                    Vector2i pt = data.getPosition();
+                    return new Point(pt.x, pt.y);
+                };
+                Map<Point, EntityData> entityMap = entities.stream().collect(Collectors.toMap(keyMapper, e -> e));
+                chunk.setEntities(entityMap);
             }
             return chunk;
         } else {
@@ -66,23 +69,22 @@ public class ChunkIO {
     public static void writeChunk(String path, ProcMapChunk chunk) throws IOException {
         if(chunk == null)   return;
         File chunkFile = new File(path);
-        File chunkDataFile = new File(path + "d");
-        DataOutputStream dos = new DataOutputStream(new FileOutputStream(chunkFile));
-        for (int y = 0; y < ProcMapChunk.CHUNK_SIZE; y++) {
-            for (int x = 0; x < ProcMapChunk.CHUNK_SIZE; x++) {
-                ProcMapCell tile = chunk.getTileAt(x, y);
-                if(tile == null? true:tile.getTileType() == null) {
-                    dos.writeInt(0);
-                } else dos.writeInt(chunk.getTileAt(x, y).getTileType().getID());
+        File chunkEntityFile = new File(path + "e");
+        FileChannel channel = FileChannel.open(chunkFile.toPath(), StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+        for (int x = 0; x < ProcMapChunk.CHUNK_SIZE; x++) {
+            for (int y = 0; y < ProcMapChunk.CHUNK_SIZE; y++) {
+                ProcMapCell cell = chunk.getTileAt(x, y);
+                if(MapCell.nullCheck(cell)) {
+                    cell.write(channel);
+                } else {
+                    ChannelUtils.writeInt(channel, 0);
+                }
             }
         }
-        dos.flush();
-        dos.close();
+        channel.close();
         
-        if(chunk.getDataCells().isEmpty())  return;
-        ObjectOutputStream dataOutputStream = new ObjectOutputStream(new FileOutputStream(chunkDataFile));
-        dataOutputStream.writeObject(chunk.getDataCells());
-        dataOutputStream.close();
+        if(chunk.getEntities().isEmpty())  return;
+        EntityLoader.writeEntities(chunkEntityFile, chunk.getEntities().values(), EntityData.STRIDE);
     }
     
 }

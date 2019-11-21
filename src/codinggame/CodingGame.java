@@ -11,6 +11,7 @@ import codinggame.handlers.AudioHandler;
 import codinggame.objs.items.ItemTypes;
 import codinggame.states.GameState;
 import codinggame.states.OptionState;
+import codinggame.states.TestState;
 import codinggame.ui.codingarea.CodingFX;
 import com.lwjglwrapper.LWJGL;
 import com.lwjglwrapper.display.Window;
@@ -19,6 +20,8 @@ import com.lwjglwrapper.utils.states.State;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL11;
 
 /**
  *
@@ -32,6 +35,7 @@ public class CodingGame extends GameStateLoop {
     public OptionState os;
     public AudioHandler audioHandler;
     public TweenManager tweenManager;
+    public TestState test;
     
     private final List<Runnable> queries = new ArrayList<>();
     
@@ -47,6 +51,7 @@ public class CodingGame extends GameStateLoop {
         
         gs = new GameState(this);
         os = new OptionState(this);
+        test = new TestState(this);
         audioHandler = new AudioHandler();
         setState(gs);
     }
@@ -91,7 +96,15 @@ public class CodingGame extends GameStateLoop {
     protected void createWindow() {
         Window.init();
         
-        window = new Window(1280, 720, "Coding Game", 60);
+        window = new Window(1280, 720, "Coding Game", 60){
+            @Override
+            protected void configWindow() {
+                super.configWindow();
+                windowHint(GLFW.GLFW_SAMPLES, 4);
+                windowHint(GLFW.GLFW_OPENGL_DEBUG_CONTEXT, GL11.GL_TRUE); 
+            }
+            
+        };
 //        window.fitScreen();
 //        window.fullScreen(true);
         window.create();

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+
+<head>
+    <title>Story</title>
+    <style>
+        body,
+        h1 {
+            background-color: white;
+            font-family: "Segoe UI";
+            font-weight: 400
+        }
+
+        p {
+            line-height: 1.5;
+            margin-bottom: -10px;
+        }
+
+        #image {
+            float: right;
+            margin: 0 0 0 15px
+        }
+
+        .button {
+            border-radius: 4px;
+            background-color: #f4511e;
+            border: none;
+            color: #FFFFFF;
+            text-align: center;
+            font-size: 28px;
+            padding: 20px;
+            width: 200px;
+            transition: all 0.5s;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .button span {
+            cursor: pointer;
+            display: inline-block;
+            position: relative;
+            transition: 0.5s;
+        }
+
+        .buttonRight span::after {
+            content: '\00bb';
+            position: absolute;
+            opacity: 0;
+            top: 0;
+            right: -20px;
+            transition: 0.5s;
+        }
+
+        .buttonLeft span::before {
+            content: '\00bb';
+            position: absolute;
+            opacity: 0;
+            top: 0;
+            left: 20px;
+            transition: 0.5s;
+        }
+
+        .buttonRight:hover span {
+            padding-right: 25px;
+        }
+
+        .buttonLeft:hover span {
+            padding-left: 25px;
+        }
+
+        .button:hover span:after {
+            opacity: 1;
+            right: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>1. Story</h1>
+    <img src="rocket.jpg" width="200" height="200" id="image" />
+    <p>On 20/7/2069, we celebrated the 100 year anniversary of the first landing on the moon by sending a spaceship
+        there.</p>
+    <p>You were one of the astronaut sended there. Unfortunately, the spaceship encounter an error and crashed into the
+        Moon.</p>
+    <p>When the error is phathien-ed, you quickly got into a lifepod and landed on the moon.</p>
+    <p>htbd was broken, so you cannot communicate with anyone.</p>
+    <p>Luckily, NASA had anticipated the problem, so they had prepared for us some things to survival on the Moon.
+    </p>
+    <p>You had exported the robots out of the spaceship to examine the Moon’s surface.</p>
+    <p>But that is not all what they can do, they can mine ores, do the gardening and other tasks.</p>
+    <p>In order to survive on the Moon, you must program the robots to do some specific tasks for you.</p>
+    <p>This book will guide you how to program those robots so that you can survive on the Moon.</p>
+    <button class="button buttonRight" style="float: right"><span>Next</span></button>
+    <button class="button buttonLeft" style="float: left"><span>Previous</span></button>
+</body>

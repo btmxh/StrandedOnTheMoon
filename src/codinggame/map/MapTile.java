@@ -17,7 +17,7 @@ import java.io.Serializable;
  * @author Welcome
  */
 public class MapTile implements Serializable{
-    public static final int MOON_TURF = 2, COPPER_ORE = 1, CHARGER = 3, BARRIER = 4, STORAGE_CELL = 5, MOON_ROCK = 6, CENTRAL_STORAGE_UNIT = 7, CHEMICAL_PROCESSOR = 8, CONVEYOR = 9, GLASS = 10, SOIL = 11, POTATO_CROPS = 12, ICE = 13, IRON_ORE = 14;
+    public static final int NULL = -1, MOON_TURF = 2, COPPER_ORE = 1, CHARGER = 3, BARRIER = 4, STORAGE_CELL = 5, MOON_ROCK = 6, CENTRAL_STORAGE_UNIT = 7, CHEMICAL_PROCESSOR = 8, CONVEYOR = 9, GLASS = 10, SOIL = 11, POTATO_CROPS = 12, ICE = 13, IRON_ORE = 14;
     public static final int LAST = IRON_ORE;
     
     private int id;

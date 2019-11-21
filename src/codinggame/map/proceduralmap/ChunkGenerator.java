@@ -7,7 +7,9 @@ package codinggame.map.proceduralmap;
 
 import codinggame.map.GameMap;
 import codinggame.map.MapTile;
+import codinggame.map.proceduralmap.entities.EntityData;
 import com.lwjglwrapper.utils.OpenSimplexNoise;
+import java.nio.ByteBuffer;
 
 /**
  *
@@ -27,29 +29,42 @@ public class ChunkGenerator {
     
     public ProcMapChunk generate(ProcMap map, int layer, int chunkX, int chunkY) {
         ProcMapChunk chunk = new ProcMapChunk();
-        if(layer == GameMap.TURF_LAYER) {
             for (int x = 0; x < ProcMapChunk.CHUNK_SIZE; x++) {
                 for (int y = 0; y < ProcMapChunk.CHUNK_SIZE; y++) {
-                    chunk.setTileAt(x, y, map.getTileset().getTile(MapTile.MOON_TURF));
+                    chunk.setTileAt(x, y, MapTile.MOON_TURF);
                 }
             }
-        } else if(layer == GameMap.ORE_LAYER) {
             for (int x = 0; x < ProcMapChunk.CHUNK_SIZE; x++) {
                 for (int y = 0; y < ProcMapChunk.CHUNK_SIZE; y++) {
                     int tileX = chunkX * ProcMapChunk.CHUNK_SIZE + x;
                     int tileY = chunkY * ProcMapChunk.CHUNK_SIZE + y;
                     double noiseValue = noise.eval(tileX * VEIN_SIZE, tileY * VEIN_SIZE);
                     if(noiseValue < IRON) {
-                        chunk.setTileAt(x, y, map.getTileset().getTile(MapTile.IRON_ORE));
+                        chunk.setEntityAt(x, y, createEntityData(tileX, tileY, MapTile.IRON_ORE));
                     } else if(noiseValue < COPPER) {
-                        chunk.setTileAt(x, y, map.getTileset().getTile(MapTile.COPPER_ORE));
+                        chunk.setEntityAt(x, y, createEntityData(tileX, tileY, MapTile.COPPER_ORE));
                     } else if(noiseValue < ROCK) {
-                        chunk.setTileAt(x, y, map.getTileset().getTile(MapTile.MOON_ROCK));
+                        chunk.setEntityAt(x, y, createEntityData(tileX, tileY, MapTile.MOON_ROCK));
                     }
                 }
             }
-        }
         return chunk;
+    }
+    
+    private static EntityData createEntityData(int x, int y, int tileID) {
+        EntityData data = EntityData.empty();
+        ByteBuffer buf = data.getBuffer();
+        buf.position(EntityData.POSITION_2D);
+        buf.putInt(x);
+        buf.putInt(y);
+        buf.put(EntityData.TILE_ENTITY);
+        buf.putInt(tileID);
+        buf.putInt(0);
+        buf.position(EntityData.HEIGHT);
+        buf.putFloat(Float.NaN);
+        buf.position(0);
+        
+        return data;
     }
     
 }

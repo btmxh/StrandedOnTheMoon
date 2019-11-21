@@ -45,7 +45,7 @@ public class GiveCommand extends Command {
         boolean testRemove = executingRobot.getInventory().testRemove(give);
         boolean testAdd = giveRobot.getInventory().testAdd(give);
         
-        if(executingRobot.getPosition().distance(giveRobot.getPosition()) > GIVE_RADIUS) {
+        if(executingRobot.get2DPosition().distance(giveRobot.get2DPosition()) > GIVE_RADIUS) {
             executor.throwExecutionError(this, "The robots are too far from each other");
             return;
         }

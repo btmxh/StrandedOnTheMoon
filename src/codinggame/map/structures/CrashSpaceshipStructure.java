@@ -8,15 +8,9 @@ package codinggame.map.structures;
 import codinggame.map.MapCell;
 import codinggame.map.MapTile;
 import codinggame.map.MapTilesets;
-import codinggame.map.cells.ChemistryCell;
-import codinggame.map.cells.ColoredCell;
-import codinggame.map.cells.FacingCell;
-import codinggame.map.cells.InventoryCell;
-import codinggame.map.cells.SheetCell;
 import codinggame.map.proceduralmap.ProcMapCell;
 import codinggame.objs.items.ItemTypes;
 import codinggame.objs.items.equipments.Drill;
-import com.lwjglwrapper.utils.colors.StaticColor;
 import java.awt.Point;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,11 +31,11 @@ public class CrashSpaceshipStructure extends Structure{
     private static Map<Point, MapCell> tileMap(MapTilesets tileset) {
         if(tileMap != null) return tileMap;
         tileMap = new HashMap<>();
-        tileMap.put(new Point(0, 0), new ProcMapCell(tileset.getTileByID(MapTile.CHARGER)));
-        InventoryCell storageCell = new InventoryCell(tileset.getTileByID(MapTile.STORAGE_CELL));
-        storageCell.getInventory().add(new Drill(ItemTypes.TITANIUM_DRILL));
-        tileMap.put(new Point(0, 1), storageCell);
-        tileMap.put(new Point(0, 2), new SheetCell(tileset.getTileByID(MapTile.POTATO_CROPS), 3));
+//        tileMap.put(new Point(0, 0), new ProcMapCell(tileset.getTileByID(MapTile.CHARGER)));
+//        InventoryCell storageCell = new InventoryCell(tileset.getTileByID(MapTile.STORAGE_CELL));
+//        storageCell.getInventory().add(new Drill(ItemTypes.TITANIUM_DRILL));
+//        tileMap.put(new Point(0, 1), storageCell);
+//        tileMap.put(new Point(0, 2), new SheetCell(tileset.getTileByID(MapTile.POTATO_CROPS), 3));
         
         return tileMap;
     }

@@ -80,7 +80,6 @@ public class ChunkThread implements Runnable{
         ChunkLocation load = null, save = null;
         ProcMapChunk saveChunk = null;
         while (running) {
-            
             synchronized (lock) {
                 Optional<ChunkLocation> loadOptional = chunksToLoad.stream().findAny();
                 load = loadOptional.isPresent()? loadOptional.get():null;

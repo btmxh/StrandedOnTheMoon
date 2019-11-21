@@ -1,11 +1,14 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
+ * To change this license header, mouseReleased License Headers in Project Properties.
+ * To change this template file, mouseReleased Tools | Templates
  * and open the template in the editor.
  */
 package codinggame.ui.codingarea;
 
 import codinggame.CodingGame;
+import codinggame.handlers.ObjectChooseHandler;
+import codinggame.objs.robots.Robot;
+import codinggame.ui.helps.HelpFX;
 import com.bulenkov.darcula.DarculaLaf;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -23,7 +26,7 @@ public class CodingFX extends Application{
 
     public static CodingFX currentApp;
     public static Stage currentStage;
-    public static WindowController currentController;
+    public static CodingWindowController currentController;
     public static Scene currentScene;
     
     @Override
@@ -47,6 +50,8 @@ public class CodingFX extends Application{
         
         stage.setTitle("Code Editor");
         stage.setAlwaysOnTop(true);
+        
+        HelpFX.initApp();
     }
     
     public static void initApp() {
@@ -56,7 +61,8 @@ public class CodingFX extends Application{
     public static void show() {
         Platform.runLater(()->{
             currentStage.show();
-            currentController.addRobot(CodingGame.getInstance().getGameState().getRobotHandler().getCurrentRobot());
+            ObjectChooseHandler.Choosable choosing = CodingGame.getInstance().getGameState().getChooseHandler().getChoosingObject().getObject();
+            if(choosing instanceof Robot)   currentController.addRobot((Robot) choosing);
         });
     }
 

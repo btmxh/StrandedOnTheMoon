@@ -46,7 +46,7 @@ public class JavaParser {
         final Method main = _main;
         return () -> {
             try {
-                Object inst = clazz.getConstructor(GameState.class, Robot.class).newInstance(game, game.getRobotHandler().getCurrentRobot());
+                Object inst = clazz.getConstructor(GameState.class, Robot.class).newInstance(game, robot);
                 robot.beginMoving();
                 main.invoke(inst);
                 robot.endMoving();
@@ -56,9 +56,8 @@ public class JavaParser {
         };
     }
     
-    public Class loadClass(String block, PrintWriter loggerWriter) {
+    public Class loadClass(String block, PrintWriter loggerWriter, Robot robot) {
         try {
-            Robot robot = game.getRobotHandler().getCurrentRobot();
             String className = robot.getName();
             block = formatCode(block, className);
             return CompilerUtils.CACHED_COMPILER.loadFromJava(
@@ -85,8 +84,8 @@ public class JavaParser {
         
         code = "public class " + className + " extends GameRobot {\n" + code + "\n\n}"; 
         
-        importStatements.add("import codinggame.lang.interfaces.*;");
-        importStatements.add("import static codinggame.lang.interfaces.Constants.*;");
+        importStatements.add("import codinggame.lang.apis.*;");
+        importStatements.add("import static codinggame.lang.apis.Constants.*;");
         importStatements.add("import codinggame.states.*;");
         importStatements.add("import codinggame.objs.*;");
         importStatements.add("import codinggame.objs.robots.*;");

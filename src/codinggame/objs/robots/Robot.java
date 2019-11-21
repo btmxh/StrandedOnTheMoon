@@ -7,9 +7,11 @@ package codinggame.objs.robots;
 
 import codinggame.globjs.Camera;
 import codinggame.handlers.GameUIHandler;
+import codinggame.handlers.ObjectChooseHandler;
 import codinggame.map.GameMap;
 import codinggame.map.MapCell;
 import codinggame.map.MapTile;
+import codinggame.map.renderer.g3d.entities.Entity;
 import codinggame.objs.Battery;
 import codinggame.objs.RobotInventory;
 import codinggame.objs.modules.Module;
@@ -27,6 +29,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import org.joml.Vector2f;
+import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.nanovg.NanoVG;
 
@@ -35,17 +38,15 @@ import org.lwjgl.nanovg.NanoVG;
  *
  * @author Welcome
  */
-public class Robot implements Serializable{
+public class Robot extends Entity implements Serializable, ObjectChooseHandler.Choosable{
     public static final String NAME = "Robot";
     
     protected boolean running = false;
     
     protected transient GameState game;
     protected String name;
-    protected Vector2f position;
     protected RobotInventory inventory;
     protected Battery battery;
-    protected transient StaticColor color = StaticColor.LIME;
     protected transient boolean hovering;
     protected transient boolean stop = false;
     protected String code;
@@ -53,70 +54,32 @@ public class Robot implements Serializable{
     private transient Object lock = new Object();
     
     public Robot(GameState game, Vector2f position, String name) {
+        super(Entity.getModel(Robot.class));
         this.game = game;
         this.name = name;
-        this.position = position;
+        this.position.set(position.x, 0, position.y);
         inventory = new RobotInventory(30);
         battery = new Battery(50000, 100000);
         code = sampleCode();
     }
     
     public void update(InputProcessor inputProcessor) {
-        Robot selectedRobot = game.getRobotHandler().getCurrentRobot();
-        color = selectedRobot == this? StaticColor.GOLDENROD:StaticColor.LIME;
-        hovering = isBeingHovered() && inputProcessor == InputProcessor.GAME;
-        if(hovering) {
-            if(LWJGL.mouse.mouseReleased(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
-                color = color.darker();
-                game.getRobotHandler().selectRobot(this);
-            } else {
-                color = color.tint(0.5f);
-            }
-        }
         for (Module module : inventory.getModules()) {
             if(module instanceof SolarPanelModule) {
                 ((SolarPanelModule) module).update(this, (float) LWJGL.currentLoop.getDeltaTime());
             }
         }
-        MapCell cell = game.getMapHandler().getMap().getMapLayer(GameMap.ORE_LAYER).getTileAt(getTileX(), getTileY());
-        if(cell == null)    return;
-        MapTile tile = cell.getTileType();
-        if(tile == null)    return;
-        if(tile.getID() == MapTile.CHARGER && Math.random() < LWJGL.currentLoop.getDeltaTime() * 5) {
+        MapCell cell = game.getMapHandler().getMap().getMapLayer(GameMap.TURF_LAYER).getTileAt(getTileX(), getTileY());
+        if(!MapCell.nullCheck(cell))    return;
+        int tileID = cell.getTileID();
+        if(tileID == MapTile.CHARGER && Math.random() < LWJGL.currentLoop.getDeltaTime() * 5) {
             battery.increase(1);
         }
     }
-    
-    public void render(NVGGraphics g) {
-        Camera camera = game.getCamera();
-        Vector2f pixelPosition = getPixelPosition(camera);
-        Vector2f translatedPosition = new Vector2f(pixelPosition).add(camera.getPixelTranslation());
-        
-        if(hovering) {
-            int x = LWJGL.mouse.getCursorX();
-            int y = LWJGL.mouse.getCursorY();
-            int w = 250, h = 100;
-            g.push();
-            g.translate(MathUtils.clamp(0, x, game.getMapViewport().getWidth() - w), MathUtils.clamp(0, y, game.getMapViewport().getHeight() - h));
-            g.rect(0, 0, w, h);
-            g.fill(StaticColor.LIGHTGRAY);
-            g.setUpText(GameUIHandler.textFont, StaticColor.WHITE, 20, NanoVG.NVG_ALIGN_LEFT | NanoVG.NVG_ALIGN_TOP);
-            g.beginPath();
-            g.translate(10, 10);
-            g.text(getTypeName(), 0, 0);
-            g.translate(0, 20);
-            g.text("Name: " + name, 0, 0);
-            g.translate(0, 20);
-            g.text("Battery: " + (int) battery.getEnergy() + "/" + (int) battery.getMaxEnergyCapacity(), 0, 0);
-            g.pop();
-        }
-        g.push();
-        g.strokeWeight(2);
-        g.circle(translatedPosition.x, translatedPosition.y, 8);
-        g.fill(color);
-        g.circle(translatedPosition.x, translatedPosition.y, 12);
-        g.stroke(color);
-        g.pop();
+
+    @Override
+    public void render() {
+        super.render();
     }
     
     public void centerOnThis(Camera camera) {
@@ -127,11 +90,11 @@ public class Robot implements Serializable{
     }
     
     public void move(Vector2f move) {
-        position.add(move);
+        position.add(move.x, 0, move.y);
     }
 
     public int getTileY() {
-        return (int) Math.floor(position.y);
+        return (int) Math.floor(position.z);
     }
 
     public int getTileX() {
@@ -139,7 +102,7 @@ public class Robot implements Serializable{
     }
     
     public Vector2f getPixelPosition(Camera camera) {
-        Vector2f pixelPosition = new Vector2f(position).mul(camera.getTileSize());
+        Vector2f pixelPosition = new Vector2f(position.x, position.z).mul(camera.getTileSize());
         
         int viewportHeight = LWJGL.window.getViewport().getHeight();
         pixelPosition.y = viewportHeight - pixelPosition.y;
@@ -159,12 +122,13 @@ public class Robot implements Serializable{
         return running;
     }
 
-    public Vector2f getPosition() {
-        return position;
+    public Vector2f get2DPosition() {
+        return new Vector2f(position.x, position.z);
     }
 
     public void moveTo(Vector2f destination) {
-        this.position = new Vector2f(destination);
+        this.position.x = destination.x;
+        this.position.z = destination.y;
     }
 
     public RobotInventory getInventory() {
@@ -194,12 +158,6 @@ public class Robot implements Serializable{
             Logger.getLogger(Robot.class.getName()).log(Level.SEVERE, null, ex);
         }
         return "";
-    }
-
-    public boolean isBeingHovered() {
-        Vector2f pixelPosition = getPixelPosition(game.getCamera());
-        Vector2f translatedPosition = new Vector2f(pixelPosition).add(game.getCamera().getPixelTranslation());
-        return LWJGL.mouse.getCursorPosition().distanceSquared(translatedPosition) < 16 * 16;
     }
 
     public Object getLock() {
@@ -236,6 +194,10 @@ public class Robot implements Serializable{
 
     private static String sampleCode() {
         return "public void main() {\n\t\n}";
+    }
+
+    public void select(float t) {
+        game.getRobotHandler().selectRobot(this, t);
     }
     
     

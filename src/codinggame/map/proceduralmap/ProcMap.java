@@ -5,22 +5,14 @@
  */
 package codinggame.map.proceduralmap;
 
-import codinggame.CodingGame;
 import codinggame.map.GameMap;
-import codinggame.map.MapCell;
-import codinggame.map.MapLayer;
 import codinggame.map.MapLayers;
 import codinggame.map.MapTileset;
 import codinggame.map.MapTilesets;
-import codinggame.map.cells.DataCell;
 import codinggame.objs.Clock;
-import codinggame.utils.Point3i;
 import java.io.BufferedWriter;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.util.Map;
 
 /**
  *
@@ -67,6 +59,5 @@ public class ProcMap extends GameMap{
         writer.write(String.valueOf(clock.getGameTime()));
         writer.close();
     }
-    
     
 }

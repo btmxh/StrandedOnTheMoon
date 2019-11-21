@@ -12,7 +12,7 @@ import codinggame.CodingGame;
  * @author Welcome
  */
 public class GameMap {
-    public static final int ORE_LAYER = 2, TURF_LAYER = 1;
+    public static final int TURF_LAYER = 1;
     
     private MapTilesets tilesets;
     private MapLayers mapLayers;

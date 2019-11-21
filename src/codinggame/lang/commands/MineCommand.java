@@ -5,21 +5,18 @@
  */
 package codinggame.lang.commands;
 
+import codinggame.CodingGame;
 import codinggame.handlers.CommandHandler;
 import codinggame.handlers.MapHandler;
 import codinggame.lang.Command;
 import codinggame.lang.CommandBlock;
 import codinggame.lang.Parser;
 import codinggame.lang.commands.utils.Direction;
-import codinggame.map.GameMap;
-import codinggame.map.MapCell;
 import codinggame.objs.Inventory;
-import codinggame.objs.items.Item;
 import codinggame.objs.items.equipments.EquipmentSlot;
 import codinggame.objs.robots.MinerRobot;
 import codinggame.objs.robots.Robot;
 import codinggame.states.GameState;
-import java.util.List;
 
 /**
  *
@@ -45,9 +42,10 @@ public class MineCommand extends Command{
         super.end();
         int x = direction.getX(executingRobot.getTileX());
         int y = direction.getY(executingRobot.getTileY());
+        CodingGame.debug(x + " " + y);
         MinerRobot miner = (MinerRobot) executingRobot;
         MapHandler mapHandler = game.getMapHandler();
-        MapHandler.BreakTile breakTile = mapHandler.breakTile(miner.getInventory().getEquipment(EquipmentSlot.DRILL), GameMap.ORE_LAYER, x, y);
+        MapHandler.Break breakTile = mapHandler.breakTileEntity(miner.getInventory().getEquipment(EquipmentSlot.DRILL), x, y);
         if(breakTile == null) {
             executor.throwExecutionError(this, "Cannot mine tile");
             return;
@@ -70,8 +68,8 @@ public class MineCommand extends Command{
         super.update(delta);
         int x = direction.getX(executingRobot.getTileX());
         int y = direction.getY(executingRobot.getTileY());
-        MapCell cell = game.getMapHandler().getMap().getMapLayer(GameMap.ORE_LAYER).getTileAt(x, y);
-        cell.increaseBreakingProgress(delta / maxTime);
+//        MapCell cell = game.getMapHandler().getMap().getMapLayer(GameMap.ORE_LAYER).getTileAt(x, y);
+//        cell.increaseBreakingProgress(delta / maxTime);
         
     }
 

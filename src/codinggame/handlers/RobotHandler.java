@@ -1,6 +1,6 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
+ * To change this license header, mouseReleased License Headers in Project Properties.
+ * To change this template file, mouseReleased Tools | Templates
  * and open the template in the editor.
  */
 package codinggame.handlers;
@@ -25,48 +25,33 @@ import java.util.HashMap;
  */
 public class RobotHandler {
     private GameState game;
-    private Camera camera;
     private HashMap<String, Robot> robots = new HashMap<>();
-    private Robot selected;
 
-    public RobotHandler(GameState game, Camera camera) {
+    public RobotHandler(GameState game) {
         this.game = game;
-        this.camera = camera;
     }
 
     public void update(InputProcessor inputProcessor) {
         robots.values().forEach(r -> r.update(inputProcessor));
     }
     
-    public void render(NVGGraphics g) {
-        for (Robot robot : robots.values()) {
-            robot.render(g);
-        }
-    }
-    
     private void addRobot(Robot robot) {
         robots.put(robot.getName(), robot);
-        if(selected == null) selected = robot;
     }
     
-    public void selectRobot(Robot robot) {
-        selected = robot;
-        game.select(robot);
+    public void selectRobot(Robot robot, float t) {
+        game.getChooseHandler().mouseReleased(ObjectChooseHandler.ChoosingObject.robot(robot), t);
         if(CodingFX.currentController == null || !CodingFX.isShowing())   return;
         CodingFX.currentController.addRobot(robot);
     }
     
-    public void selectRobot(String name) {
-        selectRobot(robots.get(name));
+    public void selectRobot(String name, float t) {
+        selectRobot(robots.get(name), t);
     }
 
     public void addRobot(Robot robot, boolean select) {
         addRobot(robot);
-        if(select)  selectRobot(robot);
-    }
-
-    public Robot getCurrentRobot() {
-        return selected;
+        if(select)  selectRobot(robot, Float.POSITIVE_INFINITY);
     }
     
     public Robot getRobot(String robotName) {
@@ -112,9 +97,7 @@ public class RobotHandler {
         return true;
     }
 
-    public boolean hoveringOnRobots() {
-        return robots.values().stream().anyMatch((robot) -> {
-            return robot.isBeingHovered();
-        });
+    public HashMap<String, Robot> getRobotList() {
+        return robots;
     }
 }

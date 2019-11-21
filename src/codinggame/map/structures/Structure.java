@@ -27,8 +27,7 @@ public class Structure {
     
     public void set(MapLayer map) {
         for (Point point : tiles.keySet()) {
-//            if(tiles.get(point).getTileType().getID() == MapTile.ICE)   System.out.println(point.x + origin.x);
-            map.setTileAt(point.x + origin.x, point.y + origin.y, tiles.get(point).clone());
+            map.setTileAt(point.x + origin.x, point.y + origin.y, tiles.get(point));
         }
     }
 }

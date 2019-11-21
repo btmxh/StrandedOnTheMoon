@@ -19,6 +19,7 @@ public class AudioHandler {
     private ALContext ctx;
     private Source source;
     private List<SoundBuffer> gameMusics;
+    private boolean musicEnabled = true;
 
     public AudioHandler() {
         ctx = new ALContext();
@@ -35,6 +36,16 @@ public class AudioHandler {
         source.dispose();
         gameMusics.forEach(SoundBuffer::dispose);
         ctx.dispose();
+    }
+
+    public boolean invert() {
+        musicEnabled = !musicEnabled;
+        if(musicEnabled) {
+            source.play();
+        } else {
+            source.stop();
+        }
+        return musicEnabled;
     }
     
     

@@ -95,11 +95,12 @@ public class CommandHandler {
     }
     
     public void throwExecutionError(Command command, String description) {
-        CodingFX.currentController.println("Execution error: " + description);
         try {
+            CodingFX.currentController.println("Execution error: " + description);
+            command.getRobot().stopCommands();
             Command.getRoot(command).forceStop();
         } catch (StopException ex) {
-            command.getRobot().stopCommands();
+            
         }
     }
 

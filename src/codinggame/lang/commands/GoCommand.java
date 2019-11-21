@@ -12,7 +12,11 @@ import codinggame.lang.Parser;
 import codinggame.lang.commands.utils.Direction;
 import codinggame.map.GameMap;
 import codinggame.map.MapCell;
+import codinggame.map.MapLayer;
 import codinggame.map.MapTile;
+import codinggame.map.proceduralmap.ProcMapLayer;
+import codinggame.map.proceduralmap.entities.EntityData;
+import codinggame.map.tiles.MapTiles;
 import codinggame.objs.robots.Robot;
 import codinggame.states.GameState;
 import org.joml.Vector2f;
@@ -41,16 +45,21 @@ public class GoCommand extends Command{
     public void begin() {
         super.begin();
         setMaxTime((float) move.length() / executingRobot.getSpeed());
-        destination = new Vector2f(executingRobot.getPosition()).add(move.x, move.y);
+        destination = new Vector2f(executingRobot.get2DPosition()).add(move.x, move.y);
+        destination.x = (float) (0.5f + Math.floor(destination.x));
+        destination.y = (float) (0.5f + Math.floor(destination.y));
+        
         for (int i = 0; i <= move.length(); i++) {
             int x = (int) (executingRobot.getTileX() + i * Math.signum(move.x));
             int y = (int) (executingRobot.getTileY() + i * Math.signum(move.y));
-            MapCell cell = game.getMapHandler().getMap().getMapLayer(GameMap.ORE_LAYER).getTileAt(x, y);
-            if(cell == null)    continue;
-            if(cell.getTileType() == null)  continue;
-            MapTile tile = cell.getTileType();
-            if(tile.isSolid()) {
-                executor.throwExecutionError(this, "The path is obstructed");
+            MapLayer layer = game.getMapHandler().getMap().getMapLayer(GameMap.TURF_LAYER);
+            if(layer instanceof ProcMapLayer) {
+                EntityData data = ((ProcMapLayer) layer).getEntityAt(x, y);
+                if(data == null)    continue;
+                if(!data.isTileEntity())    continue;
+                if(MapTiles.get(data.getTileID()).isSolid()) {
+                    executor.throwExecutionError(this, "The path is obstructed");
+                }
             }
         }
     }
