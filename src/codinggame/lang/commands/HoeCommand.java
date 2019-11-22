@@ -12,6 +12,7 @@ import codinggame.map.GameMap;
 import codinggame.map.MapCell;
 import codinggame.map.MapLayer;
 import codinggame.map.MapTile;
+import codinggame.map.proceduralmap.CellUtils;
 import codinggame.objs.items.Item;
 import codinggame.objs.items.equipments.EquipmentSlot;
 import codinggame.objs.items.equipments.Hoe;
@@ -46,7 +47,7 @@ public class HoeCommand extends Command{
         if(cell == null? true:cell.getTileID() == -1? true : cell.getTileID() != MapTile.MOON_TURF) {
             executor.throwExecutionError(this, "This tile is not ploughable");
         } else {
-            layer.setTileAt(executingRobot.getTileX(), executingRobot.getTileY(), MapTile.SOIL);
+            layer.setTileAt(executingRobot.getTileX(), executingRobot.getTileY(), CellUtils.soilCell(null, null));
             super.end();
         }
     }

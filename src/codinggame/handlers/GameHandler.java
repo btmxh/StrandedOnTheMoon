@@ -5,9 +5,14 @@ import codinggame.map.GameMap;
 import codinggame.map.MapTile;
 import codinggame.map.MapTilesets;
 import codinggame.map.proceduralmap.ProcMap;
+import codinggame.map.proceduralmap.ProcMapCell;
 import codinggame.map.proceduralmap.ProcMapChunk;
 import codinggame.map.proceduralmap.ProcMapLayer;
 import codinggame.map.proceduralmap.entities.EntityData;
+import codinggame.map.proceduralmap.entities.rendering.EntityBatch;
+import codinggame.map.proceduralmap.entities.rendering.EntityHandler;
+import codinggame.map.proceduralmap.entities.rendering.ForEachable;
+import codinggame.map.proceduralmap.entities.rendering.ModelManager;
 import codinggame.map.renderer.g3d.Camera3D;
 import codinggame.map.renderer.g3d.DebugCamera3D;
 import codinggame.map.renderer.g3d.SkyboxRenderer;
@@ -33,18 +38,20 @@ import com.lwjglwrapper.opengl.shaders.uniforms.variables.UInt;
 import com.lwjglwrapper.opengl.shaders.uniforms.variables.UMat4;
 import com.lwjglwrapper.opengl.shaders.uniforms.variables.UVec3;
 import com.lwjglwrapper.opengl.shaders.uniforms.variables.UVec4;
+import com.lwjglwrapper.utils.Logger;
 import com.lwjglwrapper.utils.input.KeyBindings;
 import com.lwjglwrapper.utils.models.ModelGenerator;
 import com.lwjglwrapper.utils.models.OBJLoader;
 import java.awt.Point;
 import java.nio.ByteBuffer;
-import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
+import java.util.function.Consumer;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
@@ -67,7 +74,6 @@ public class GameHandler {
     private PackedTexture tileAtlas;
     private TerrainPicker picker;
     private MapTilesets tileset;
-    private EntityRenderer renderer;
     
     private Map<Point, RenderableChunk> renders;
     private Set<Point> circlePoints = generateCirclePoints(RENDER_DISTANCE);
@@ -86,6 +92,8 @@ public class GameHandler {
     private Map<TexturedVAO, Iterable<? extends Entity>> entities = new HashMap<>();
     
     private AABBBuilder tileAABB = new AABBBuilder().xCenter(0f, 1f).yCenter(0f, 1f).zCenter(0f, 1f);
+    
+    private EntityHandler entityHandler;
 
     public GameHandler(GameState game) {
         this.game = game;
@@ -116,6 +124,7 @@ public class GameHandler {
 //        camera = new FirstPersonCamera(70.0f, LWJGL.window, 0.1f, 1000f);
         //camera.setSpeed(16f, 16f, 5f);
         keyBindings = new KeyBindings().defaultKeyBindings().debugKeyBindings();
+        entityHandler = new EntityHandler(this);
         
         camera = new DebugCamera3D(new Vector3f(), 70.0f, LWJGL.window, 0.1f, 1000f){
             @Override
@@ -148,7 +157,6 @@ public class GameHandler {
         noise.setXscl(NOISE_SCALE);
         noise.setYscl(NOISE_SCALE);
         
-        renderer = new EntityRenderer();
         renders = new HashMap<>();
         
         lightStruct = new Light.Struct(shader, "light");
@@ -156,7 +164,29 @@ public class GameHandler {
         skyboxRenderer = new SkyboxRenderer();
         
         Iterable<? extends Entity> robots = game.getRobotHandler().getRobotList().values();
-        entities.put(Entity.getModel(Robot.class).getMesh(), robots);
+        entities.put(ModelManager.ROBOT.getMesh(), robots);
+        
+        entityHandler.getEntities().put(ModelManager.ROBOT, game.getRobotHandler().getRobotList().values());
+        entityHandler.getEntities().put((Consumer<EntityBatch> consumer) -> {
+            Map<EntityModel, List> sortMap = new HashMap<>();
+            for (RenderableChunk chunk : renders.values()) {
+                for (EntityData entity : chunk.getEntities().values()) {
+                    if(entity.isTileEntity()) {
+                        EntityModel model = ModelManager.tileEntityModel(entity.getTileID());
+                        List batch = sortMap.get(model);
+                        if(batch == null) {
+                            sortMap.put(model, batch = new LinkedList<>());
+                        }
+                        batch.add(entity);
+                    }
+                }
+            }
+            for (Map.Entry<EntityModel, List> entry : sortMap.entrySet()) {
+                EntityModel model = entry.getKey();
+                List batch = entry.getValue();
+                consumer.accept(new EntityBatch(model, (c) -> batch.forEach(c)));
+            }
+        });
     }
     
     private Point lastCameraChunkPos;
@@ -224,7 +254,13 @@ public class GameHandler {
         for (Iterable<? extends Entity> batch : entities.values()) for (Entity entity : batch) {
             entity.update(noise, delta);
         }
+        ProcMapCell cell = (ProcMapCell) turfLayer.getTileAt(random.nextInt(16), random.nextInt(16));
+        TileUpdateHandler.updateCell(cell);
+        EntityData eCell = turfLayer.getEntityAt(random.nextInt(16), random.nextInt(16));
+        if(eCell != null)   TileUpdateHandler.updateEntityCell(eCell);
     }
+    
+    public static final Random random = new Random();
     
     boolean wireframe = false;
     private Map<Integer, TexturedVAO> tileModels = new HashMap<>();
@@ -242,9 +278,8 @@ public class GameHandler {
         new UInt(shader, "tileAtlas").load(0);
         new UVec4(shader, "mixColor").load(0f, 0f, 0f, 0f);
         lightStruct.set(light);
-        Point cameraChunk = getChunk(camera);
         
-        Map<TexturedVAO, List<Entity>> tileEntities = new HashMap<>();
+        Point cameraChunk = getChunk(camera);
         
         for (Map.Entry<Point, RenderableChunk> entry : renders.entrySet()) {
             Point pt = entry.getKey();
@@ -252,49 +287,44 @@ public class GameHandler {
             RenderableChunk chunk = entry.getValue();
             new UVec3(shader, "translation").load(pt.x * ProcMapChunk.CHUNK_SIZE, 0, pt.y * ProcMapChunk.CHUNK_SIZE);
             chunk.render();
-            Map<Point, EntityData> tiles = chunk.getEntities();
-            for (EntityData tile : tiles.values()) {
-                if(tile.isTileEntity()) {
-                    int tileID = tile.getTileID();
-                    TexturedVAO model = tileModels.get(tileID);
-                    if(model == null) {
-                        model = mg.texturedCube2D(tileset.getTileByID(tileID).getTexture(), 0);
-                        tileModels.put(tileID, model);
-                    }
-                    List<Entity> batch = tileEntities.get(model);
-                    if(batch == null) {
-                        batch = new LinkedList<>();
-                        tileEntities.put(model, batch);
-                    }
-                    Vector2f pos = new Vector2f(tile.getPosition()).add(0.5f, 0.5f);
-                    float height = tile.getHeight();
-                    if(Float.isNaN(height)) {
-                        height = noise.getTriangleHeight(pos.x, pos.y) + 0.25f;
-                        tile.setHeight(height);
-                    }
-                    batch.add(new Entity(new EntityModel(model, null), new Vector3f(pos.x, height, pos.y), new Vector3f(), new Vector3f(1f)));
-                }
-            }
         }
-        
-//        if(hoveringTile != null) {
-//            int chX = (int) Math.ceil((float) hoveringTile.x / ProcMapChunk.CHUNK_SIZE);
-//            int chZ = (int) Math.ceil((float) hoveringTile.y / ProcMapChunk.CHUNK_SIZE);
-//            RenderableChunk chunk = renders.get(new Point(chX, chZ));
-//            if(chunk != null) {
-//                new UVec3(shader, "translation").load(chX * ProcMapChunk.CHUNK_SIZE, 0, chZ * ProcMapChunk.CHUNK_SIZE);
-//                new UVec4(shader, "mixColor").load(1f, 1f, 1f, 1f);
-//                chunk.renderTileAt(Math.floorMod(hoveringTile.x, ProcMapChunk.CHUNK_SIZE), Math.floorMod(hoveringTile.y, ProcMapChunk.CHUNK_SIZE));
-//                chunk.renderTileAt(0, 0);
-//            }
-//        }
+
+        ObjectChooseHandler.ChoosingObject choosingObject = game.getChooseHandler().getChoosingObject();
+        ObjectChooseHandler.Choosable choosing = choosingObject.getObject();
+        if(choosing instanceof ProcMapCell) {
+            int tileX = choosingObject.getX();
+            int tileY = choosingObject.getY();
+            
+            int inChunkX = tileX % ProcMapChunk.CHUNK_SIZE;
+            if(inChunkX < 0)   inChunkX += ProcMapChunk.CHUNK_SIZE;
+            int inChunkY = tileY % ProcMapChunk.CHUNK_SIZE;
+            if(inChunkY < 0)   inChunkY += ProcMapChunk.CHUNK_SIZE;
+            
+            int chunkX = (int) Math.floor((double) tileX / ProcMapChunk.CHUNK_SIZE);
+            int chunkY = (int) Math.floor((double) tileY / ProcMapChunk.CHUNK_SIZE);
+            
+            new UVec3(shader, "translation").load(chunkX * ProcMapChunk.CHUNK_SIZE, 0, chunkY * ProcMapChunk.CHUNK_SIZE);
+            
+            chunkX -= cameraChunk.x;
+            chunkY -= cameraChunk.y;
+            
+            new UVec4(shader, "mixColor").load(1f, 1f, 1f, 1f);
+            RenderableChunk chunk = renders.get(new Point(chunkX, chunkY));
+            
+            GLCalls.disable(GL11.GL_DEPTH_TEST);
+            chunk.renderTileAt(inChunkX, inChunkY);
+            GLCalls.enable(GL11.GL_DEPTH_TEST);
+            Logger.logln(chunkX, chunkY, inChunkX, inChunkY);
+        }
         
         tileAtlas.unbind();
         GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
         shader.unbind();
         
-        renderer.render(camera, entities);
-        renderer.render(camera, tileEntities);
+        //renderer.render(camera, entities);
+        //renderer.render(camera, tileEntities);
+        
+        entityHandler.render(camera);
     }
     
     private static Set<Point> generateCirclePoints(int radius) {
@@ -335,6 +365,10 @@ public class GameHandler {
             if(v == value)  return key;
         }
         return null;
+    }
+
+    public INoise getNoise() {
+        return noise;
     }
     
 }

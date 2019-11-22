@@ -6,11 +6,6 @@
 package codinggame.map.structures;
 
 import codinggame.map.MapCell;
-import codinggame.map.MapTile;
-import codinggame.map.MapTilesets;
-import codinggame.map.proceduralmap.ProcMapCell;
-import codinggame.objs.items.ItemTypes;
-import codinggame.objs.items.equipments.Drill;
 import java.awt.Point;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,11 +19,11 @@ public class CrashSpaceshipStructure extends Structure{
     
     private static Map<Point, MapCell> tileMap;
     
-    public CrashSpaceshipStructure(Vector2i origin, MapTilesets tileset) {
-        super(origin, tileMap(tileset));
+    public CrashSpaceshipStructure(Vector2i origin) {
+        super(origin, tileMap(), new HashMap<>());
     }
     
-    private static Map<Point, MapCell> tileMap(MapTilesets tileset) {
+    private static Map<Point, MapCell> tileMap() {
         if(tileMap != null) return tileMap;
         tileMap = new HashMap<>();
 //        tileMap.put(new Point(0, 0), new ProcMapCell(tileset.getTileByID(MapTile.CHARGER)));

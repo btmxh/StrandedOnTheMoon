@@ -31,36 +31,6 @@ import org.lwjgl.opengl.GL11;
  * @author Welcome
  */
 public class Entity {
-    private static Map<String, EntityModel> models;
-    
-    static {
-        models = new HashMap<>();
-        OBJLoader loader = new OBJLoader(0, 2, 1);
-        ModelGenerator mg = new ModelGenerator(loader);
-        try {
-            models.put(Robot.class.getSimpleName(), create(loader, "/models/stall/stall.obj", "/models/stall/stallTexture.png", new AABBBuilder().xCenter(0, 0.4f).yCorner(0, 0.5f).zCenter(0, 0.2f).build()));
-            models.put(MapTiles.get(MapTile.COPPER_ORE).getName(), new EntityModel(mg.texturedCube2D(Entity.class, "/tiles/ore_copper_moon.png", 0), new AABBBuilder().xCenter(0f, 1f).yCenter(0f, 1f).zCenter(0f, 1f).build()));
-        } catch (IOException ex) {
-            Logger.getLogger(Entity.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    
-    public static EntityModel getModel(Class clazz) {
-        return models.get(clazz.getSimpleName());
-    }
-    
-    public static EntityModel getModel(String className) {
-        return models.get(className);
-    }
-    
-    private static EntityModel create(OBJLoader loader, String obj, String tex, AABBf boundBox) throws IOException {
-        TexturedVAO mesh = loader.loadOBJ(Entity.class.getResourceAsStream(obj), new Texture2D(TextureData.fromResource(Entity.class, tex)), 0, true);
-        return new EntityModel(mesh, boundBox);
-    }
-    
-    private static Texture2D loadTex(String filepath) {
-        return new Texture2D(TextureData.fromResource(Entity.class, filepath));
-    }
     
     protected final EntityModel model;
     protected final Vector3f position, rotation, scale;

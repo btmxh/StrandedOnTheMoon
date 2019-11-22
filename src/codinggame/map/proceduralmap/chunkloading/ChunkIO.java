@@ -46,7 +46,7 @@ public class ChunkIO {
                 if(stride == 0) chunk.setTileAt(x, y, null);
                 else {
                     byte[] arr = ChannelUtils.read_arr(channel, stride);
-                    chunk.setTileAt(x, y, new ProcMapCell(arr, stride));
+                    chunk.setTileAt(x, y, new ProcMapCell(arr));
                 }
             }
             inputStream.close();

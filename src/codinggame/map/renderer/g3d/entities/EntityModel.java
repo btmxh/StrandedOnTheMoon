@@ -14,10 +14,13 @@ import org.joml.Vector3f;
  * @author Welcome
  */
 public class EntityModel {
+    
+    private String type;
     private TexturedVAO vao;
     private AABBf boundBox;
 
-    public EntityModel(TexturedVAO vao, AABBf boundBox) {
+    public EntityModel(String type, TexturedVAO vao, AABBf boundBox) {
+        this.type = type;
         this.vao = vao;
         this.boundBox = boundBox;
     }
@@ -31,8 +34,11 @@ public class EntityModel {
     }
 
     public AABBf getBoundBox(Vector3f translation) {
-        
         return AABBUtils.translate(boundBox, translation);
+    }
+
+    public String getType() {
+        return type;
     }
     
     

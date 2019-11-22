@@ -36,7 +36,6 @@ public class MapHandler {
     private final GameState game;
     private GameMap map;
     //private MapRenderer renderer;
-    private TileUpdateHandler tileUpdateHandler;
     
     public MapHandler(GameState game, Clock clock) {
         this.game = game;
@@ -49,11 +48,9 @@ public class MapHandler {
         }
 //        this.renderer = new MapRenderer();
 //        renderer.setOriginPosition(-1, -1);
-        tileUpdateHandler = new TileUpdateHandler(game, this);
     }
     
     public void update() {
-        //tileUpdateHandler.update();
     }
     
     public void save(Clock clock) {

@@ -9,11 +9,11 @@ import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.equations.Sine;
 import codinggame.CodingGame;
 import codinggame.map.MapCell;
-import codinggame.map.MapTile;
+import codinggame.map.proceduralmap.CellUtils;
+import codinggame.map.proceduralmap.ProcMapCell;
 import codinggame.map.proceduralmap.entities.EntityData;
 import codinggame.map.tiles.MapTiles;
 import codinggame.objs.Battery;
-import codinggame.objs.Inventory;
 import codinggame.objs.items.Item;
 import codinggame.objs.items.ItemType;
 import codinggame.objs.items.equipments.EquipmentSlot;
@@ -30,6 +30,7 @@ import codinggame.ui.books.XMLBookParser;
 import codinggame.ui.books.content.pages.XMLPage;
 import codinggame.ui.codingarea.CodingFX;
 import codinggame.ui.helps.HelpFX;
+import codinggame.utils.Utils;
 import com.lwjglwrapper.LWJGL;
 import com.lwjglwrapper.display.Window;
 import com.lwjglwrapper.nanovg.NVGFont;
@@ -38,7 +39,7 @@ import com.lwjglwrapper.nanovg.NVGImage;
 import com.lwjglwrapper.nanovg.paint.ImagePaint;
 import com.lwjglwrapper.nanovg.paint.Paint;
 import com.lwjglwrapper.utils.colors.StaticColor;
-import com.lwjglwrapper.utils.Utils;
+//import com.lwjglwrapper.utils.Utils;
 import com.lwjglwrapper.utils.floats.GLFloats;
 import com.lwjglwrapper.utils.floats.GLFloat;
 import com.lwjglwrapper.utils.geom.PaintedShape;
@@ -62,7 +63,6 @@ import javafx.util.Pair;
 import org.joml.Rectanglef;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.nanovg.NanoVG;
-import org.lwjgl.system.MemoryUtil;
 
 /**
  *
@@ -312,14 +312,25 @@ public class GameUIHandler {
                 .setAllAfterPaints((g) -> {
                     ObjectChooseHandler.ChoosingObject choosingObject = game.getChooseHandler().getChoosingObject();
                     ObjectChooseHandler.Choosable choosing = choosingObject.getObject();
-                    if(choosing instanceof MapCell) {
-                        MapCell cell = (MapCell) choosing;
+                    if(choosing instanceof ProcMapCell) {
+                        ProcMapCell cell = (ProcMapCell) choosing;
                         if(!MapCell.nullCheck(cell))    return;
+                        byte tileType = cell.getTileType();
                         g.translate(0, 60);
                         g.setUpText(textFont, StaticColor.WHITE, 20, NanoVG.NVG_ALIGN_TOP | NanoVG.NVG_ALIGN_LEFT);
                         g.text("Tile: " + MapTiles.get(cell.getTileID()).getName(), 10, 0);
                         g.translate(0, 30);
                         g.text("Position: x=" + choosingObject.getX() + " y=" + choosingObject.getY(), 10, 0);
+                        g.translate(0, 50);
+                        g.text("Tile type: " + CellUtils.name(tileType), 10, 0);
+                        switch(tileType) {
+                            case CellUtils.SOIL_CELL:
+                                g.translate(0, 30);
+                                g.text("Hydration: " + Utils.percentage(CellUtils.soil_getHydration(cell), 0, 1, 1), 10, 0);
+                                g.translate(0, 30);
+                                g.text("pH: " + CellUtils.soil_getPH(cell), 10, 0);
+                                break;
+                        }
                         g.translate(0, 25);
 //                        if(cell instanceof FacingCell) {
 //                            g.text("Facing: ", 10, 5);
@@ -567,7 +578,7 @@ public class GameUIHandler {
         private static NVGImage loadIcon(String name) {
             try {
                 String pathName = "/ui/" + name + ".png";
-                ByteBuffer buffer = Utils.ioResourceToByteBuffer(IconManager.class.getResourceAsStream(pathName), 8 * 1024);
+                ByteBuffer buffer = com.lwjglwrapper.utils.Utils.ioResourceToByteBuffer(IconManager.class.getResourceAsStream(pathName), 8 * 1024);
                 NVGImage image = LWJGL.graphics.createNanoVGImageFromResource(buffer, 0);
                 icons.put(name, image);
                 return image;

@@ -131,7 +131,7 @@ public class ProcMapLayer implements MapLayer{
     }
     
     public void setTileEntityAt(int x, int y, MapCell cell, EntityData data) {
-        if(MapCell.nullCheck(cell)) {
+        if(!MapCell.nullCheck(cell)) {
             setEntityAt(x, y, null);
             return;
         }

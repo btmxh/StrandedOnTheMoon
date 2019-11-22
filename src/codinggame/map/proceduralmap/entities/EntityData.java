@@ -8,6 +8,7 @@ package codinggame.map.proceduralmap.entities;
 import codinggame.handlers.ObjectChooseHandler;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 
@@ -45,7 +46,8 @@ public class EntityData implements ObjectChooseHandler.Choosable{
 
     @Override
     public String toString() {
-        return Arrays.toString(buffer.array());
+//        return Arrays.toString(buffer.array());
+        return getTileID() + "";
     }
 
     public ByteBuffer getBuffer() {
@@ -69,6 +71,11 @@ public class EntityData implements ObjectChooseHandler.Choosable{
         int tileID = buffer.getInt();
         return tileID;
     }
+    
+    public void setTagID(int tag) {
+        buffer.position(TAG);
+        buffer.putInt(tag);
+    }
 
     public Vector2i getPosition() {
         buffer.position(POSITION_2D);
@@ -90,5 +97,10 @@ public class EntityData implements ObjectChooseHandler.Choosable{
         Vector2i xz = getPosition();
         float y = getHeight();
         return new Vector3f(xz.x, y, xz.y);
+    }
+
+    public void setPosition(Vector2f xz) {
+        buffer.position(POSITION_2D);
+        buffer.putInt((int) xz.x).putInt((int) xz.y);
     }
 }

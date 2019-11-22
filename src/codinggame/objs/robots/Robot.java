@@ -6,11 +6,11 @@
 package codinggame.objs.robots;
 
 import codinggame.globjs.Camera;
-import codinggame.handlers.GameUIHandler;
 import codinggame.handlers.ObjectChooseHandler;
 import codinggame.map.GameMap;
 import codinggame.map.MapCell;
 import codinggame.map.MapTile;
+import codinggame.map.proceduralmap.entities.rendering.ModelManager;
 import codinggame.map.renderer.g3d.entities.Entity;
 import codinggame.objs.Battery;
 import codinggame.objs.RobotInventory;
@@ -21,17 +21,11 @@ import codinggame.states.GameState;
 import codinggame.states.InputProcessor;
 import com.lwjglwrapper.LWJGL;
 import com.lwjglwrapper.display.Viewport;
-import com.lwjglwrapper.nanovg.NVGGraphics;
-import com.lwjglwrapper.utils.colors.StaticColor;
-import com.lwjglwrapper.utils.math.MathUtils;
 import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import org.joml.Vector2f;
-import org.joml.Vector3f;
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.nanovg.NanoVG;
 
 
 /**
@@ -54,7 +48,7 @@ public class Robot extends Entity implements Serializable, ObjectChooseHandler.C
     private transient Object lock = new Object();
     
     public Robot(GameState game, Vector2f position, String name) {
-        super(Entity.getModel(Robot.class));
+        super(ModelManager.ROBOT);
         this.game = game;
         this.name = name;
         this.position.set(position.x, 0, position.y);

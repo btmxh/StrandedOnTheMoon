@@ -18,28 +18,29 @@ import java.nio.channels.FileChannel;
  *
  * @author Welcome
  */
-public class ProcMapCell implements MapCell, Serializable{
+public class ProcMapCell implements MapCell, Serializable {
 
     public static final int TILE_ID = 0, TILE_TYPE = Integer.BYTES;
 
     public static ProcMapCell createCell(int tileID) {
         byte[] arr = new byte[Integer.BYTES];
         ByteArray.putInt(arr, TILE_ID, tileID);
-        return new ProcMapCell(arr, Integer.BYTES);
+        return new ProcMapCell(arr);
     }
-    
-    protected byte[] data;
-    protected int stride;
 
-    public ProcMapCell(byte[] data, int stride) {
+    protected byte[] data;
+
+    public ProcMapCell(byte[] data) {
         this.data = data;
-        this.stride = stride;
     }
-    
+
     @Override
     public int getBreakingStage() {
-        if(!isBreaking())    return -1;
-        else return MathUtils.clamp(0, (int) (0 * 4), 3);
+        if (!isBreaking()) {
+            return -1;
+        } else {
+            return MathUtils.clamp(0, (int) (0 * 4), 3);
+        }
     }
 
     @Override
@@ -56,9 +57,17 @@ public class ProcMapCell implements MapCell, Serializable{
         return ByteArray.getInt(data, TILE_ID);
     }
 
+    public byte getTileType() {
+        if (data.length < Integer.BYTES + Byte.BYTES) {
+            return CellUtils.NORMAL_CELL; //All cells by default are normal cells
+        } else {
+            return ByteArray.get(data, TILE_TYPE);
+        }
+    }
+
     public void write(FileChannel channel) throws IOException {
         ByteBuffer strideBuffer = ByteBuffer.allocate(Integer.BYTES);
-        strideBuffer.putInt(stride);
+        strideBuffer.putInt(data.length);
         strideBuffer.flip();
         channel.write(strideBuffer);
         channel.write(ByteArray.toBuffer(data));
@@ -68,5 +77,5 @@ public class ProcMapCell implements MapCell, Serializable{
     public String toString() {
         return MapTiles.get(getTileID()).getName();
     }
-    
+
 }

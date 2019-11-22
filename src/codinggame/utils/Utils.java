@@ -5,9 +5,12 @@
  */
 package codinggame.utils;
 
+import com.lwjglwrapper.utils.math.MathUtils;
 import java.lang.reflect.Field;
-import java.text.MessageFormat;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -77,5 +80,32 @@ public class Utils {
             Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
+    }
+    
+    public static float ifNull(Float val, float ifNull) {
+        return val == null? ifNull:val;
+    }
+    
+    public static int ifNull(Integer val, int ifNull) {
+        return val == null? ifNull:val;
+    }
+    
+    public static void cosi(Float v) {
+        System.out.println(ifNull(v, 420.0f));
+    }
+    
+    public static String percentage(float f, float start, float end, int fractionDigits) {
+        float percentage = MathUtils.map(f, start, end, 0f, 100f);
+        StringBuilder pattern = new StringBuilder("#.");
+        for(int i = 0; i < fractionDigits; i++) pattern.append("#");
+        DecimalFormat format = new DecimalFormat(pattern.toString(), new DecimalFormatSymbols(Locale.US));
+        format.setDecimalSeparatorAlwaysShown(true);
+        format.setMinimumFractionDigits(fractionDigits);
+        return format.format(percentage) + "%";
+    }   
+    
+    public static void main(String[] args) {
+        cosi(null);
+        cosi(69f);
     }
 }
